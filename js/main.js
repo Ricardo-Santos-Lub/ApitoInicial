@@ -7,6 +7,7 @@ import {
   validarPartida,
   ajustarMinuto,
   definirMinuto,
+  avancarSegundo,
   encerrarPrimeiroTempo,
   iniciarSegundoTempo,
   encerrarPartida
@@ -17,7 +18,7 @@ import { sortearTitularesTime } from "./logica/titulares.js";
 import { registrarGol, registrarSubstituicao, removerEvento } from "./logica/eventos.js";
 import { salvar, carregar } from "./storage.js";
 import { renderTelaConfig } from "./ui/telaConfig.js";
-import { renderPlacar } from "./ui/placar.js";
+import { renderPlacar, atualizarRelogio } from "./ui/placar.js";
 import { renderEstatisticas } from "./ui/estatisticas.js";
 import { renderSumula } from "./ui/sumula.js";
 
@@ -215,3 +216,14 @@ const callbacksSumula = {
 };
 
 renderizar();
+
+// Cronômetro correndo sozinho enquanto a partida está em andamento. Atualiza só o
+// texto do relógio (não a tela inteira) pra não atrapalhar quem estiver digitando
+// no campo de correção de minuto.
+setInterval(() => {
+  const nova = avancarSegundo(partida);
+  if (nova === partida) return;
+  partida = nova;
+  salvar(partida);
+  atualizarRelogio(partida);
+}, 1000);

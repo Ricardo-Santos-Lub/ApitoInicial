@@ -9,6 +9,7 @@ export function criarPartidaVazia() {
     status: "nao_iniciada", // nao_iniciada | em_andamento | intervalo | encerrada
     tempo: "1_tempo", // 1_tempo | 2_tempo
     minutoAtual: 0,
+    segundoAtual: 0,
     proximoJogadorId: 1,
     proximoEventoId: 1,
     modoFormacao: "manual", // manual | sorteio
@@ -65,12 +66,24 @@ export function definirMinuto(partida, minuto) {
   return { ...partida, minutoAtual: Math.max(0, minuto) };
 }
 
+// Chamada a cada segundo pelo cronômetro enquanto a partida está em andamento.
+// Fora desse status, o relógio fica parado (retorna a mesma referência, sem re-render).
+export function avancarSegundo(partida) {
+  if (partida.status !== "em_andamento") return partida;
+  const totalSegundos = partida.minutoAtual * 60 + partida.segundoAtual + 1;
+  return {
+    ...partida,
+    minutoAtual: Math.floor(totalSegundos / 60),
+    segundoAtual: totalSegundos % 60
+  };
+}
+
 export function encerrarPrimeiroTempo(partida) {
   return { ...partida, status: "intervalo" };
 }
 
 export function iniciarSegundoTempo(partida) {
-  return { ...partida, status: "em_andamento", tempo: "2_tempo", minutoAtual: 0 };
+  return { ...partida, status: "em_andamento", tempo: "2_tempo", minutoAtual: 0, segundoAtual: 0 };
 }
 
 export function encerrarPartida(partida) {

@@ -629,12 +629,35 @@ button.botao.secundario {
   cursor: not-allowed;
 }
 
-.input-minuto {
-  width: 84px;
+.relogio-grande {
+  min-width: 132px;
   text-align: center;
-  font-size: 1.6rem;
+  font-size: 2.4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--md-on-surface);
+}
+
+.correcao-minuto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.correcao-minuto label {
+  color: var(--md-on-surface-variant);
+  font-size: 0.8rem;
+}
+
+.input-minuto {
+  width: 64px;
+  text-align: center;
+  font-size: 1rem;
   font-weight: 600;
-  padding: 0.4rem;
+  padding: 0.3rem;
   border-radius: var(--shape-xs);
   border: 1px solid var(--md-outline);
   background: var(--md-surface);
@@ -650,11 +673,6 @@ button.botao.secundario {
 
 .input-minuto:disabled {
   opacity: 0.6;
-}
-
-.minuto-sufixo {
-  color: var(--md-on-surface-variant);
-  font-size: 0.85rem;
 }
 
 .botoes-controle-tempo {

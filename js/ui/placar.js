@@ -38,10 +38,14 @@ export function renderPlacar(partida, uiState, callbacks) {
       <p class="badge-status">${rotuloStatus(partida)}</p>
       <div class="cronometro">
         <button class="botao-minuto ripple" id="btnMenosMinuto" ${podeEditarMinuto(partida) ? "" : "disabled"}>−1</button>
+        <div class="relogio-grande" id="relogioTexto">${formatarRelogio(partida)}</div>
+        <button class="botao-minuto ripple" id="btnMaisMinuto" ${podeEditarMinuto(partida) ? "" : "disabled"}>+1</button>
+      </div>
+
+      <div class="correcao-minuto">
+        <label for="minutoAtual">Corrigir minuto</label>
         <input type="number" id="minutoAtual" class="input-minuto" value="${partida.minutoAtual}" min="0"
           ${podeEditarMinuto(partida) ? "" : "disabled"}>
-        <span class="minuto-sufixo">min</span>
-        <button class="botao-minuto ripple" id="btnMaisMinuto" ${podeEditarMinuto(partida) ? "" : "disabled"}>+1</button>
       </div>
 
       <div class="botoes-controle-tempo">
@@ -66,6 +70,26 @@ export function renderPlacar(partida, uiState, callbacks) {
 
   vincularEventos(app, partida, uiState, callbacks);
   ativarRipple(app);
+}
+
+// Atualização leve do cronômetro, chamada a cada segundo pelo tick em main.js.
+// Só troca o texto do relógio — não refaz o innerHTML da tela, pra não derrubar
+// o foco de quem estiver digitando no campo de correção de minuto.
+export function atualizarRelogio(partida) {
+  const relogio = document.getElementById("relogioTexto");
+  if (relogio) relogio.textContent = formatarRelogio(partida);
+
+  // Só sincroniza o campo de correção se ele não estiver em uso, senão apagaria o que a pessoa está digitando.
+  const inputMinuto = document.getElementById("minutoAtual");
+  if (inputMinuto && document.activeElement !== inputMinuto) {
+    inputMinuto.value = partida.minutoAtual;
+  }
+}
+
+function formatarRelogio(partida) {
+  const minuto = String(partida.minutoAtual).padStart(2, "0");
+  const segundo = String(partida.segundoAtual).padStart(2, "0");
+  return `${minuto}:${segundo}`;
 }
 
 function rotuloStatus(partida) {
