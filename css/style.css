@@ -207,14 +207,14 @@ sl-icon-button.botao-voltar::part(base) {
   padding: 0;
 }
 
-/* ===== Card (superfície elevada) ===== */
+/* ===== Card (superfície elevada) =====
+   O card em si (fundo, padding, raio, sombra) é o próprio sl-card — ver "sl-card" em
+   shoelace-tema.css. Essa classe .card só fica de gancho pra estilizar o conteúdo
+   encaixado (h2, listas etc.); duplicar padding/fundo/sombra aqui de novo faz o host
+   ficar maior que a largura do grid (o padding soma com o --padding interno do
+   componente e estoura a largura disponível no mobile). */
 .card {
-  background: var(--md-surface-container);
   color: var(--md-on-surface);
-  border-radius: var(--shape-md);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: var(--elevation-1);
 }
 
 .card h2 {
@@ -264,13 +264,17 @@ sl-icon-button.botao-voltar::part(base) {
 
 .times-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, 1fr) em vez de só 1fr: sem o "0" o item do grid não encolhe além do
+     conteúdo mínimo dele, e o <input> nativo dentro do sl-input tem uma largura mínima
+     "de fábrica" (baseada no atributo size=20 do navegador) maior que a coluna — isso
+     empurrava o card do time pra fora da tela no mobile. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 
 @media (min-width: 640px) {
   .times-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
