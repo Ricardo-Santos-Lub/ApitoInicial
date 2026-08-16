@@ -2,6 +2,7 @@
 
 import { ativarRipple } from "./ripple.js";
 import { buscarJogador } from "../logica/eventos.js";
+import { calcularVencedor } from "../logica/rodizio.js";
 import { ICONE_EVENTO, ROTULO_TEMPO_CURTO, descreverEvento } from "./timelineFormato.js";
 import { iconeEstatisticas, iconeEditar } from "./icones.js";
 import { escapeHtml } from "./dom.js";
@@ -47,6 +48,8 @@ export function renderPlacar(partida, uiState, callbacks) {
         ${renderBotaoControleTempo(partida)}
       </div>
     </section>
+
+    ${partida.status === "encerrada" && partida.filaReserva.length > 0 ? renderProximaRodada(partida, uiState) : ""}
 
     <section class="card painel-eventos-card">
       ${renderPainelEventos(partida, uiState)}
@@ -124,6 +127,91 @@ function renderBotaoControleTempo(partida) {
     `;
   }
   return "";
+}
+
+// ===== Modo rodízio: transição pro próximo jogo (vencedor fica, perdedor sai pra fila) =====
+
+function renderProximaRodada(partida, uiState) {
+  if (calcularVencedor(partida) === null) {
+    return renderPenaltis(partida, uiState);
+  }
+  return renderEscolherProximoTime(partida);
+}
+
+// O botão de confirmar fica desabilitado enquanto os pênaltis estão empatados (abaixo),
+// então quem bate continua tocando até desempatar — não existe um estado "empatou de
+// novo" pra mostrar aqui, é sempre a mesma tela até sair um vencedor.
+function renderPenaltis(partida, uiState) {
+  const casa = partida.times.casa;
+  const visitante = partida.times.visitante;
+  const tally = uiState.penaltisTemp;
+
+  return `
+    <section class="card">
+      <h2>Empate — decide nos pênaltis</h2>
+      <div class="placar-linha">
+        <div class="placar-time" style="--cor-time:${casa.cor}">
+          <span class="placar-nome">${escapeHtml(casa.nome)}</span>
+        </div>
+        <div class="placar-numeros">
+          <span>${tally.casa}</span>
+          <span class="placar-separador">x</span>
+          <span>${tally.visitante}</span>
+        </div>
+        <div class="placar-time placar-time-direita" style="--cor-time:${visitante.cor}">
+          <span class="placar-nome">${escapeHtml(visitante.nome)}</span>
+        </div>
+      </div>
+      <div class="acoes-evento">
+        <button class="botao-evento ripple" data-penalti="casa">⚽<span>${escapeHtml(casa.nome)}</span></button>
+        <button class="botao-evento ripple" data-penalti="visitante">⚽<span>${escapeHtml(visitante.nome)}</span></button>
+      </div>
+      <div class="botoes-controle-tempo">
+        <button class="botao secundario ripple" id="btnZerarPenaltis">Zerar</button>
+        <button class="botao ripple" id="btnConfirmarPenaltis" ${tally.casa === tally.visitante ? "disabled" : ""}>
+          Confirmar resultado dos pênaltis
+        </button>
+      </div>
+    </section>
+  `;
+}
+
+function renderEscolherProximoTime(partida) {
+  const vencedorId = calcularVencedor(partida);
+  const perdedorId = vencedorId === "casa" ? "visitante" : "casa";
+  const nomeVencedor = partida.times[vencedorId].nome;
+  const nomePerdedor = partida.times[perdedorId].nome;
+
+  if (partida.filaReserva.length === 1) {
+    const timeDaFila = partida.filaReserva[0];
+    return `
+      <section class="card">
+        <h2>🏆 ${escapeHtml(nomeVencedor)} venceu!</h2>
+        <p class="status-partida">${escapeHtml(timeDaFila.nome)} entra no lugar de ${escapeHtml(nomePerdedor)}.</p>
+        <button class="botao ripple" data-proximo-time="${timeDaFila.id}">Começar próximo jogo</button>
+      </section>
+    `;
+  }
+
+  const itens = partida.filaReserva
+    .map(
+      (time) => `
+      <li>
+        <button class="ripple item-selecao" data-proximo-time="${time.id}">
+          <span class="dot-time" style="--cor-time:${time.cor}"></span>
+          ${escapeHtml(time.nome)}
+        </button>
+      </li>`
+    )
+    .join("");
+
+  return `
+    <section class="card">
+      <h2>🏆 ${escapeHtml(nomeVencedor)} venceu!</h2>
+      <p class="status-partida">Escolha quem entra no lugar de ${escapeHtml(nomePerdedor)}:</p>
+      <ul class="lista-selecao">${itens}</ul>
+    </section>
+  `;
 }
 
 // ===== Painel de registro de eventos =====
@@ -269,5 +357,14 @@ function vincularEventos(app, partida, uiState, callbacks) {
 
   app.querySelector("#btnVerEstatisticas").addEventListener("click", callbacks.onVerEstatisticas);
   app.querySelector("#btnEditarTimes").addEventListener("click", callbacks.onEditarTimes);
+
+  app.querySelectorAll("[data-penalti]").forEach((btn) => {
+    btn.addEventListener("click", () => callbacks.onRegistrarPenalti(btn.dataset.penalti));
+  });
+  app.querySelector("#btnZerarPenaltis")?.addEventListener("click", () => callbacks.onZerarPenaltis());
+  app.querySelector("#btnConfirmarPenaltis")?.addEventListener("click", () => callbacks.onConfirmarPenaltis());
+  app.querySelectorAll("[data-proximo-time]").forEach((btn) => {
+    btn.addEventListener("click", () => callbacks.onIniciarProximaRodada(parseInt(btn.dataset.proximoTime, 10)));
+  });
 }
 

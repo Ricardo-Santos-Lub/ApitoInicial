@@ -14,14 +14,19 @@ export function criarPartidaVazia() {
     tempoInicioEpoch: null, // Date.now() de quando o cronômetro atual começou a correr; null quando parado
     proximoJogadorId: 1,
     proximoEventoId: 1,
+    proximoTimeReservaId: 1,
     modoFormacao: "manual", // manual | sorteio
     poolJogadores: [], // jogadores sem time, usados só no modo sorteio
     times: {
       casa: { nome: "", cor: "#1e88e5", jogadores: [] },
       visitante: { nome: "", cor: "#e53935", jogadores: [] }
     },
+    // Times sorteados além dos 2 que já entram em campo — modo sorteio com jogadores
+    // suficientes pra formar 3+ times. Fila de espera pra substituir quem perder (ver logica/rodizio.js).
+    filaReserva: [],
     placar: { casa: 0, visitante: 0 },
-    eventos: []
+    eventos: [],
+    penaltis: null // { casa, visitante } só durante um desempate no modo rodízio
   };
 }
 
@@ -42,9 +47,11 @@ export function definirDuracao(partida, duracaoMinutos) {
 export function definirModoFormacao(partida, modo) {
   if (modo === partida.modoFormacao) return partida;
   // Troca de modo zera os times: manual e sorteio não podem misturar dados.
+  // A fila de reserva só existe no modo sorteio, então some junto.
   return {
     ...partida,
     modoFormacao: modo,
+    filaReserva: [],
     times: {
       ...partida.times,
       casa: { ...partida.times.casa, jogadores: [] },
@@ -60,6 +67,13 @@ export function definirTime(partida, timeId, dados) {
       ...partida.times,
       [timeId]: { ...partida.times[timeId], ...dados }
     }
+  };
+}
+
+export function definirTimeReserva(partida, timeReservaId, dados) {
+  return {
+    ...partida,
+    filaReserva: partida.filaReserva.map((time) => (time.id === timeReservaId ? { ...time, ...dados } : time))
   };
 }
 

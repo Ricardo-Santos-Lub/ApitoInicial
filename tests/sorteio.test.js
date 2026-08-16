@@ -33,3 +33,50 @@ test("sortearTimes atribui timeId correto a cada jogador distribuído", () => {
   assert.ok(p.times.casa.jogadores.every((j) => j.timeId === "casa"));
   assert.ok(p.times.visitante.jogadores.every((j) => j.timeId === "visitante"));
 });
+
+test("sortearTimes com pool pequeno (menos de 2 times completos) não forma fila de reserva", () => {
+  let p = definirFormato(criarPartidaVazia(), 6);
+  for (let i = 0; i < 8; i++) p = adicionarJogadorPool(p, `J${i}`, 3);
+
+  p = sortearTimes(p);
+  assert.deepEqual(p.filaReserva, []);
+});
+
+test("sortearTimes com pool grande forma times extras e guarda na fila de reserva", () => {
+  let p = definirFormato(criarPartidaVazia(), 5);
+  for (let i = 0; i < 20; i++) p = adicionarJogadorPool(p, `J${i}`, (i % 5) + 1);
+
+  p = sortearTimes(p);
+  assert.equal(p.times.casa.jogadores.length, 5);
+  assert.equal(p.times.visitante.jogadores.length, 5);
+  assert.equal(p.filaReserva.length, 2);
+  assert.ok(p.filaReserva.every((time) => time.jogadores.length === 5));
+
+  const totalDistribuido =
+    p.times.casa.jogadores.length + p.times.visitante.jogadores.length + p.filaReserva.reduce((soma, t) => soma + t.jogadores.length, 0);
+  assert.equal(totalDistribuido, 20);
+});
+
+test("sortearTimes distribui a sobra (pool não é múltiplo exato) como reserva extra dentro dos times", () => {
+  let p = definirFormato(criarPartidaVazia(), 5);
+  for (let i = 0; i < 22; i++) p = adicionarJogadorPool(p, `J${i}`, (i % 5) + 1);
+
+  p = sortearTimes(p);
+  const tamanhos = [p.times.casa.jogadores.length, p.times.visitante.jogadores.length, ...p.filaReserva.map((t) => t.jogadores.length)];
+  assert.equal(tamanhos.reduce((a, b) => a + b, 0), 22);
+  // 22 = 4 times de 5 + 2 sobrando -> exatamente 2 times com 6 jogadores, os outros 2 com 5
+  assert.equal(tamanhos.filter((t) => t === 6).length, 2);
+  assert.equal(tamanhos.filter((t) => t === 5).length, 2);
+});
+
+test("sortearTimes: cada time formado respeita o limite de titulares em campo", () => {
+  let p = definirFormato(criarPartidaVazia(), 5);
+  for (let i = 0; i < 22; i++) p = adicionarJogadorPool(p, `J${i}`, (i % 5) + 1);
+
+  p = sortearTimes(p);
+  const todosOsTimes = [p.times.casa, p.times.visitante, ...p.filaReserva];
+  for (const time of todosOsTimes) {
+    const titulares = time.jogadores.filter((j) => j.titular).length;
+    assert.ok(titulares <= 5, `${time.nome ?? "time"} tem ${titulares} titulares, limite é 5`);
+  }
+});

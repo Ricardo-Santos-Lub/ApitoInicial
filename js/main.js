@@ -4,6 +4,7 @@ import {
   definirDuracao,
   definirModoFormacao,
   definirTime,
+  definirTimeReserva,
   iniciarPartida,
   validarPartida,
   avancarSegundo,
@@ -15,6 +16,7 @@ import { adicionarJogador, removerJogador, adicionarJogadorPool, removerJogadorP
 import { sortearTimes } from "./logica/sorteio.js";
 import { sortearTitularesTime } from "./logica/titulares.js";
 import { registrarGol, registrarSubstituicao, removerEvento } from "./logica/eventos.js";
+import { registrarPenaltis, iniciarProximaRodada } from "./logica/rodizio.js";
 import { salvar, carregar } from "./storage.js";
 import { manterTelaLigada, liberarTelaLigada } from "./wakeLock.js";
 import { renderTelaConfig } from "./ui/telaConfig.js";
@@ -30,6 +32,9 @@ let telaAtual = partida.status === "nao_iniciada" ? "config" : "placar";
 // Estado de navegação — transiente, não faz parte dos dados da partida.
 let painelAberto = null; // null | "gol" | "substituicao"
 let jogadorSaiSelecionado = null; // { timeId, jogadorId } durante o fluxo de substituição
+// Contagem dos pênaltis em andamento no modo rodízio — só vira estado da partida
+// (partida.penaltis) quando confirmada, pra não travar o resultado a cada toque.
+let penaltisTemp = { casa: 0, visitante: 0 };
 // Se os times já têm nome, a pergunta de formato já foi respondida numa sessão anterior.
 let formatoConfirmado = partida.times.casa.nome.trim() !== "" || partida.times.visitante.nome.trim() !== "" || partida.status !== "nao_iniciada";
 
@@ -49,7 +54,7 @@ function renderizar() {
   } else if (telaAtual === "sumula") {
     renderSumula(partida, callbacksSumula);
   } else {
-    renderPlacar(partida, { painelAberto, jogadorSaiSelecionado }, callbacksPlacar);
+    renderPlacar(partida, { painelAberto, jogadorSaiSelecionado, penaltisTemp }, callbacksPlacar);
   }
 }
 
@@ -73,6 +78,11 @@ const callbacksConfig = {
 
   onAtualizarTime: (timeId, dados) => {
     partida = definirTime(partida, timeId, dados);
+    salvar(partida); // sem re-render aqui pra não perder o foco do input
+  },
+
+  onAtualizarTimeReserva: (timeReservaId, dados) => {
+    partida = definirTimeReserva(partida, timeReservaId, dados);
     salvar(partida); // sem re-render aqui pra não perder o foco do input
   },
 
@@ -198,6 +208,31 @@ const callbacksPlacar = {
   onVerSumula: () => {
     telaAtual = "sumula";
     renderizar();
+  },
+
+  // ===== Modo rodízio (vencedor fica, perdedor sai pra fila) =====
+
+  onRegistrarPenalti: (timeId) => {
+    penaltisTemp = { ...penaltisTemp, [timeId]: penaltisTemp[timeId] + 1 };
+    renderizar();
+  },
+
+  onZerarPenaltis: () => {
+    penaltisTemp = { casa: 0, visitante: 0 };
+    renderizar();
+  },
+
+  onConfirmarPenaltis: () => {
+    partida = registrarPenaltis(partida, penaltisTemp.casa, penaltisTemp.visitante);
+    penaltisTemp = { casa: 0, visitante: 0 };
+    renderizar();
+  },
+
+  onIniciarProximaRodada: (timeReservaId) => {
+    partida = iniciarProximaRodada(partida, timeReservaId);
+    penaltisTemp = { casa: 0, visitante: 0 };
+    telaAtual = "config"; // reaproveita a tela de config pra revisar/iniciar o próximo jogo
+    renderizar();
   }
 };
 
@@ -221,6 +256,7 @@ function reiniciarApp() {
   formatoConfirmado = false;
   painelAberto = null;
   jogadorSaiSelecionado = null;
+  penaltisTemp = { casa: 0, visitante: 0 };
   renderizar();
 }
 

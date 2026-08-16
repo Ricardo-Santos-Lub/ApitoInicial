@@ -128,6 +128,8 @@ function renderModoSorteio(partida) {
       ${renderCabecalhoTime(partida, "visitante", "Time Visitante")}
     </section>
 
+    ${partida.filaReserva.length ? renderFilaReserva(partida) : ""}
+
     <section class="card">
       <h2>Jogadores para sortear</h2>
       <p class="contador-jogadores">${partida.poolJogadores.length} jogador(es) cadastrado(s)</p>
@@ -169,6 +171,50 @@ function renderCabecalhoTime(partida, timeId, titulo) {
         <input type="color" id="cor-${timeId}" value="${time.cor}">
       </div>
       <div class="campo">${conteudoRoster}</div>
+    </div>
+  `;
+}
+
+// Jogadores suficientes pro sorteio formar 3+ times: os times além dos 2 que entram em
+// campo ficam aqui, esperando pra substituir quem perder (ver logica/rodizio.js).
+function renderFilaReserva(partida) {
+  return `
+    <section class="card">
+      <h2>Times na fila de espera</h2>
+      <p class="contador-jogadores">Entram no lugar de quem perder, depois que a partida atual terminar.</p>
+    </section>
+    <section class="times-grid">
+      ${partida.filaReserva.map((time) => renderTimeReservaCard(partida, time)).join("")}
+    </section>
+  `;
+}
+
+function renderTimeReservaCard(partida, time) {
+  const limite = partida.formato.jogadoresPorTime;
+  const titulares = time.jogadores.filter((j) => j.titular);
+  const reservas = time.jogadores.filter((j) => !j.titular);
+  const itemHtml = (j) => `<li><span>${rotuloJogador(j)}</span></li>`;
+
+  return `
+    <div class="card time-card" style="--cor-time:${time.cor}">
+      <h2>${escapeHtml(time.nome)}</h2>
+      <div class="campo">
+        <label for="nome-reserva-${time.id}">Nome do time</label>
+        <input type="text" id="nome-reserva-${time.id}" value="${escapeHtml(time.nome)}" placeholder="Ex: Real Matismo">
+      </div>
+      <div class="campo">
+        <label for="cor-reserva-${time.id}">Cor</label>
+        <input type="color" id="cor-reserva-${time.id}" value="${time.cor}">
+      </div>
+      <div class="campo">
+        <p class="contador-jogadores">Em campo (${titulares.length}/${limite})</p>
+        <ul class="lista-jogadores">${titulares.length ? titulares.map(itemHtml).join("") : `<li class="lista-vazia">Ninguém em campo ainda</li>`}</ul>
+        ${
+          reservas.length
+            ? `<p class="contador-jogadores">Reserva (${reservas.length})</p><ul class="lista-jogadores">${reservas.map(itemHtml).join("")}</ul>`
+            : ""
+        }
+      </div>
     </div>
   `;
 }
@@ -272,6 +318,17 @@ function vincularEventos(app, partida, callbacks) {
       }
 
       callbacks.onAdicionarJogador(timeId, nome, numero);
+    });
+  });
+
+  partida.filaReserva.forEach((time) => {
+    app.querySelector(`#nome-reserva-${time.id}`)?.addEventListener("input", (e) => {
+      callbacks.onAtualizarTimeReserva(time.id, { nome: e.target.value });
+    });
+
+    app.querySelector(`#cor-reserva-${time.id}`)?.addEventListener("input", (e) => {
+      callbacks.onAtualizarTimeReserva(time.id, { cor: e.target.value });
+      e.target.closest(".time-card").style.setProperty("--cor-time", e.target.value);
     });
   });
 
