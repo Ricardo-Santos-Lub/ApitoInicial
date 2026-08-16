@@ -1,34 +1,34 @@
 /* ===== Design tokens — tema "esportivo vibrante" (verde-grama), tema claro por padrão ===== */
 :root {
-  --md-primary: #1b8a4a;
+  --md-primary: #0a58ff;
   --md-on-primary: #ffffff;
-  --md-primary-container: #d3f3dc;
-  --md-on-primary-container: #04371a;
+  --md-primary-container: #dde6ff;
+  --md-on-primary-container: #001c4d;
 
-  --md-secondary: #4d6357;
+  --md-secondary: #46536b;
   --md-on-secondary: #ffffff;
-  --md-secondary-container: #cfe9d8;
-  --md-on-secondary-container: #0a2015;
+  --md-secondary-container: #dbe3f7;
+  --md-on-secondary-container: #101c30;
 
   --md-error: #ba1a1a;
   --md-on-error: #ffffff;
   --md-error-container: #ffdad6;
   --md-on-error-container: #410002;
 
-  --md-background: #f5faf6;
-  --md-on-background: #171d19;
+  --md-background: #f5f7fc;
+  --md-on-background: #14161f;
 
-  --md-surface: #f5faf6;
-  --md-on-surface: #171d19;
-  --md-surface-container: #e9f1ea;
-  --md-surface-container-high: #dfe9e0;
-  --md-surface-variant: #dbe5dc;
-  --md-on-surface-variant: #404943;
+  --md-surface: #f5f7fc;
+  --md-on-surface: #14161f;
+  --md-surface-container: #e9edf7;
+  --md-surface-container-high: #dde2f0;
+  --md-surface-variant: #dde1ec;
+  --md-on-surface-variant: #444b5c;
 
-  --md-outline: #707972;
-  --md-outline-variant: #c0cac2;
+  --md-outline: #767c8c;
+  --md-outline-variant: #c5cad9;
 
-  --md-primary-alt: #0f6636;
+  --md-primary-alt: #0447d1;
 
   --shape-xs: 6px;
   --shape-sm: 10px;
@@ -36,41 +36,41 @@
   --shape-lg: 20px;
   --shape-full: 999px;
 
-  --elevation-1: 0 1px 2px rgba(10, 40, 20, 0.14), 0 1px 4px 1px rgba(10, 40, 20, 0.08);
-  --elevation-2: 0 2px 6px rgba(10, 40, 20, 0.18), 0 4px 14px 2px rgba(10, 40, 20, 0.1);
+  --elevation-1: 0 1px 2px rgba(10, 25, 55, 0.14), 0 1px 4px 1px rgba(10, 25, 55, 0.08);
+  --elevation-2: 0 2px 6px rgba(10, 25, 55, 0.18), 0 4px 14px 2px rgba(10, 25, 55, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --md-primary: #7ddb99;
-    --md-on-primary: #00391a;
-    --md-primary-container: #005226;
-    --md-on-primary-container: #96f7ae;
+    --md-primary: #a9c3ff;
+    --md-on-primary: #002667;
+    --md-primary-container: #0a3aa6;
+    --md-on-primary-container: #dde6ff;
 
-    --md-secondary: #b3ccbb;
-    --md-on-secondary: #1e352a;
-    --md-secondary-container: #354b40;
-    --md-on-secondary-container: #cfe9d8;
+    --md-secondary: #b7c2da;
+    --md-on-secondary: #202b40;
+    --md-secondary-container: #333f58;
+    --md-on-secondary-container: #dbe3f7;
 
     --md-error: #ffb4ab;
     --md-on-error: #690005;
     --md-error-container: #93000a;
     --md-on-error-container: #ffdad6;
 
-    --md-background: #0e130f;
-    --md-on-background: #dfe4de;
+    --md-background: #0b0e16;
+    --md-on-background: #e5e8f2;
 
-    --md-surface: #0e130f;
-    --md-on-surface: #dfe4de;
-    --md-surface-container: #1a201b;
-    --md-surface-container-high: #242b25;
-    --md-surface-variant: #404943;
-    --md-on-surface-variant: #c0cac2;
+    --md-surface: #0b0e16;
+    --md-on-surface: #e5e8f2;
+    --md-surface-container: #171b26;
+    --md-surface-container-high: #212635;
+    --md-surface-variant: #444b5c;
+    --md-on-surface-variant: #c5cad9;
 
-    --md-outline: #8a938b;
-    --md-outline-variant: #404943;
+    --md-outline: #8b91a3;
+    --md-outline-variant: #383f52;
 
-    --md-primary-alt: #4bbf72;
+    --md-primary-alt: #6ea1ff;
 
     --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 4px 1px rgba(0, 0, 0, 0.3);
     --elevation-2: 0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 16px 2px rgba(0, 0, 0, 0.32);
@@ -188,20 +188,23 @@ main#app.tem-nav-inferior {
   font-weight: 700;
 }
 
-.botao-voltar {
-  position: relative;
-  overflow: hidden;
+/* Agora é um sl-icon-button (name="chevron-left") — a "pílula" circular vem via ::part(base),
+   já que o botão nativo interno do componente é que recebe fundo/tamanho/raio. */
+sl-icon-button.botao-voltar {
   flex-shrink: 0;
+  font-size: 1.3rem;
+  color: var(--md-on-surface);
+}
+
+sl-icon-button.botao-voltar::part(base) {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: none;
   border-radius: 50%;
   background: var(--md-surface-container-high);
-  color: var(--md-on-surface);
-  cursor: pointer;
+  padding: 0;
 }
 
 /* ===== Card (superfície elevada) ===== */
@@ -359,6 +362,7 @@ main#app.tem-nav-inferior {
 
 .add-jogador-form {
   display: flex;
+  align-items: flex-start;
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
@@ -383,6 +387,62 @@ main#app.tem-nav-inferior {
   color: var(--md-on-surface);
   font-family: inherit;
   font-size: 0.85rem;
+}
+
+/* ===== Campos Shoelace (sl-input / sl-select / sl-button) ===== */
+.add-jogador-form sl-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-jogador-form sl-input.input-numero {
+  flex: 0 0 4.2rem;
+}
+
+.add-jogador-form sl-select.select-nivel {
+  flex: 0 0 6.4rem;
+}
+
+.add-jogador-form sl-button {
+  flex-shrink: 0;
+}
+
+sl-input,
+sl-select {
+  display: block;
+  width: 100%;
+}
+
+.botao-full {
+  display: block;
+  width: 100%;
+}
+
+.botao-full::part(base) {
+  width: 100%;
+}
+
+/* Seletor de atributo pra ganhar especificidade sobre o `:host { color }` interno do
+   componente (que senão venceria a cascata mesmo com a cor herdada aplicada aqui fora). */
+sl-icon-button[name="x-lg"] {
+  font-size: 1.1rem;
+  color: var(--md-error);
+  flex-shrink: 0;
+}
+
+/* ===== Grupo de modo (sl-radio-group como segmented control) ===== */
+.modo-formacao {
+  display: flex;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.modo-formacao sl-radio-button {
+  flex: 1;
+}
+
+.modo-formacao sl-radio-button::part(button) {
+  width: 100%;
 }
 
 .nivel-tag {

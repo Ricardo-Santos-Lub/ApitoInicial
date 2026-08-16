@@ -20,7 +20,7 @@ export function renderPlacar(partida, uiState, callbacks) {
   app.classList.add("tem-nav-inferior");
 
   app.innerHTML = `
-    <section class="card placar-card">
+    <sl-card class="card placar-card">
       <div class="placar-linha">
         <div class="placar-time" style="--cor-time:${casa.cor}">
           <span class="placar-nome">${escapeHtml(casa.nome)}</span>
@@ -34,9 +34,9 @@ export function renderPlacar(partida, uiState, callbacks) {
           <span class="placar-nome">${escapeHtml(visitante.nome)}</span>
         </div>
       </div>
-    </section>
+    </sl-card>
 
-    <section class="card cronometro-card">
+    <sl-card class="card cronometro-card">
       <p class="badge-status">${rotuloStatus(partida)}</p>
       <div class="cronometro">
         <div class="relogio-circulo ${tempoEsgotado(partida) ? "relogio-circulo-esgotado" : ""}" id="relogioCirculo">
@@ -47,18 +47,18 @@ export function renderPlacar(partida, uiState, callbacks) {
       <div class="botoes-controle-tempo">
         ${renderBotaoControleTempo(partida)}
       </div>
-    </section>
+    </sl-card>
 
     ${partida.status === "encerrada" && partida.filaReserva.length > 0 ? renderProximaRodada(partida, uiState) : ""}
 
-    <section class="card painel-eventos-card">
+    <sl-card class="card painel-eventos-card">
       ${renderPainelEventos(partida, uiState)}
-    </section>
+    </sl-card>
 
-    <section class="card timeline-card">
+    <sl-card class="card timeline-card">
       <h2>Linha do tempo</h2>
       <ul class="timeline-lista">${renderTimeline(partida)}</ul>
-    </section>
+    </sl-card>
 
     <nav class="nav-inferior">
       <button class="nav-inferior-item ripple" id="btnVerEstatisticas">${iconeEstatisticas}<span>Estatísticas</span></button>
@@ -112,18 +112,18 @@ function rotuloStatus(partida) {
 
 function renderBotaoControleTempo(partida) {
   if (partida.status === "em_andamento" && partida.tempo === "1_tempo") {
-    return `<button class="botao ripple" id="btnEncerrarTempo">Encerrar 1º Tempo</button>`;
+    return `<sl-button variant="primary" pill class="botao-full" id="btnEncerrarTempo">Encerrar 1º Tempo</sl-button>`;
   }
   if (partida.status === "intervalo") {
-    return `<button class="botao ripple" id="btnIniciarSegundoTempo">Iniciar 2º Tempo</button>`;
+    return `<sl-button variant="primary" pill class="botao-full" id="btnIniciarSegundoTempo">Iniciar 2º Tempo</sl-button>`;
   }
   if (partida.status === "em_andamento" && partida.tempo === "2_tempo") {
-    return `<button class="botao ripple" id="btnEncerrarPartida">Encerrar Partida</button>`;
+    return `<sl-button variant="primary" pill class="botao-full" id="btnEncerrarPartida">Encerrar Partida</sl-button>`;
   }
   if (partida.status === "encerrada") {
     return `
-      <button class="botao secundario ripple" id="btnVerSumula">Ver súmula da partida</button>
-      <button class="botao ripple" id="btnNovaPartida">Nova Partida</button>
+      <sl-button variant="primary" outline pill class="botao-full" id="btnVerSumula">Ver súmula da partida</sl-button>
+      <sl-button variant="primary" pill class="botao-full" id="btnNovaPartida">Nova Partida</sl-button>
     `;
   }
   return "";
@@ -147,7 +147,7 @@ function renderPenaltis(partida, uiState) {
   const tally = uiState.penaltisTemp;
 
   return `
-    <section class="card">
+    <sl-card class="card">
       <h2>Empate — decide nos pênaltis</h2>
       <div class="placar-linha">
         <div class="placar-time" style="--cor-time:${casa.cor}">
@@ -167,12 +167,12 @@ function renderPenaltis(partida, uiState) {
         <button class="botao-evento ripple" data-penalti="visitante">⚽<span>${escapeHtml(visitante.nome)}</span></button>
       </div>
       <div class="botoes-controle-tempo">
-        <button class="botao secundario ripple" id="btnZerarPenaltis">Zerar</button>
-        <button class="botao ripple" id="btnConfirmarPenaltis" ${tally.casa === tally.visitante ? "disabled" : ""}>
+        <sl-button variant="primary" outline pill class="botao-full" id="btnZerarPenaltis">Zerar</sl-button>
+        <sl-button variant="primary" pill class="botao-full" id="btnConfirmarPenaltis" ${tally.casa === tally.visitante ? "disabled" : ""}>
           Confirmar resultado dos pênaltis
-        </button>
+        </sl-button>
       </div>
-    </section>
+    </sl-card>
   `;
 }
 
@@ -185,11 +185,11 @@ function renderEscolherProximoTime(partida) {
   if (partida.filaReserva.length === 1) {
     const timeDaFila = partida.filaReserva[0];
     return `
-      <section class="card">
+      <sl-card class="card">
         <h2>🏆 ${escapeHtml(nomeVencedor)} venceu!</h2>
         <p class="status-partida">${escapeHtml(timeDaFila.nome)} entra no lugar de ${escapeHtml(nomePerdedor)}.</p>
-        <button class="botao ripple" data-proximo-time="${timeDaFila.id}">Começar próximo jogo</button>
-      </section>
+        <sl-button variant="primary" pill class="botao-full" data-proximo-time="${timeDaFila.id}">Começar próximo jogo</sl-button>
+      </sl-card>
     `;
   }
 
@@ -206,11 +206,11 @@ function renderEscolherProximoTime(partida) {
     .join("");
 
   return `
-    <section class="card">
+    <sl-card class="card">
       <h2>🏆 ${escapeHtml(nomeVencedor)} venceu!</h2>
       <p class="status-partida">Escolha quem entra no lugar de ${escapeHtml(nomePerdedor)}:</p>
       <ul class="lista-selecao">${itens}</ul>
-    </section>
+    </sl-card>
   `;
 }
 
@@ -234,7 +234,7 @@ function renderPainelEventos(partida, uiState) {
     return `
       <h2>Quem marcou?</h2>
       ${renderListaSelecaoJogador(partida, "data-gol", { apenas: "titulares" })}
-      <button class="botao secundario ripple" data-fechar-painel>Cancelar</button>
+      <sl-button variant="primary" outline pill class="botao-full" data-fechar-painel>Cancelar</sl-button>
     `;
   }
 
@@ -243,7 +243,7 @@ function renderPainelEventos(partida, uiState) {
       return `
         <h2>Quem sai? <small>(só quem está em campo)</small></h2>
         ${renderListaSelecaoJogador(partida, "data-sub-sai", { apenas: "titulares" })}
-        <button class="botao secundario ripple" data-fechar-painel>Cancelar</button>
+        <sl-button variant="primary" outline pill class="botao-full" data-fechar-painel>Cancelar</sl-button>
       `;
     }
     const { timeId, jogadorId } = uiState.jogadorSaiSelecionado;
@@ -252,7 +252,7 @@ function renderPainelEventos(partida, uiState) {
     return `
       <h2>Quem entra no lugar de ${escapeHtml(jogadorSai?.nome ?? "")}?</h2>
       ${reservasDisponiveis || `<p class="lista-vazia">Esse time não tem reserva disponível.</p>`}
-      <button class="botao secundario ripple" data-fechar-painel>Cancelar</button>
+      <sl-button variant="primary" outline pill class="botao-full" data-fechar-painel>Cancelar</sl-button>
     `;
   }
 
@@ -303,7 +303,7 @@ function renderTimeline(partida) {
         <span class="timeline-minuto">${evento.minuto}' <small>${ROTULO_TEMPO_CURTO[evento.tempo]}</small></span>
         <span class="timeline-icone">${ICONE_EVENTO[evento.tipo]}</span>
         <span class="timeline-descricao">${descreverEvento(partida, evento)}</span>
-        <button class="ripple" data-remover-evento="${evento.id}" title="Remover evento">✕</button>
+        <sl-icon-button name="x-lg" label="Remover evento" data-remover-evento="${evento.id}"></sl-icon-button>
       </li>`
     )
     .join("");

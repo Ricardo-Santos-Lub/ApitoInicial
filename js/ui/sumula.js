@@ -4,7 +4,6 @@
 import { ativarRipple } from "./ripple.js";
 import { calcularEstatisticas } from "../logica/estatisticas.js";
 import { ICONE_EVENTO, ROTULO_TEMPO_CURTO, descreverEvento } from "./timelineFormato.js";
-import { iconeVoltar } from "./icones.js";
 import { escapeHtml } from "./dom.js";
 
 export function renderSumula(partida, callbacks) {
@@ -15,11 +14,11 @@ export function renderSumula(partida, callbacks) {
 
   app.innerHTML = `
     <div class="cabecalho-tela">
-      <button class="botao-voltar ripple" id="btnVoltarTopo" title="Voltar ao placar">${iconeVoltar}</button>
+      <sl-icon-button class="botao-voltar" name="chevron-left" label="Voltar ao placar" id="btnVoltarTopo"></sl-icon-button>
       <h2>📋 Súmula final</h2>
     </div>
 
-    <section class="card placar-card">
+    <sl-card class="card placar-card">
       <p class="status-partida">${formatarData(partida.data)} · Súmula final</p>
       <div class="placar-linha">
         <div class="placar-time" style="--cor-time:${casa.cor}">
@@ -34,35 +33,35 @@ export function renderSumula(partida, callbacks) {
           <span class="placar-nome">${escapeHtml(visitante.nome)}</span>
         </div>
       </div>
-    </section>
+    </sl-card>
 
-    <section class="card" style="--cor-time:${casa.cor}">
+    <sl-card class="card" style="--cor-time:${casa.cor}">
       <h2 class="titulo-time-cor">Escalação — ${escapeHtml(casa.nome)}</h2>
       ${renderEscalacao(partida, "casa")}
-    </section>
+    </sl-card>
 
-    <section class="card" style="--cor-time:${visitante.cor}">
+    <sl-card class="card" style="--cor-time:${visitante.cor}">
       <h2 class="titulo-time-cor">Escalação — ${escapeHtml(visitante.nome)}</h2>
       ${renderEscalacao(partida, "visitante")}
-    </section>
+    </sl-card>
 
-    <section class="card" style="--cor-time:${casa.cor}">
+    <sl-card class="card" style="--cor-time:${casa.cor}">
       <h2 class="titulo-time-cor">Artilharia — ${escapeHtml(casa.nome)}</h2>
       ${renderListaEstatisticas(partida, "casa")}
-    </section>
+    </sl-card>
 
-    <section class="card" style="--cor-time:${visitante.cor}">
+    <sl-card class="card" style="--cor-time:${visitante.cor}">
       <h2 class="titulo-time-cor">Artilharia — ${escapeHtml(visitante.nome)}</h2>
       ${renderListaEstatisticas(partida, "visitante")}
-    </section>
+    </sl-card>
 
-    <section class="card">
+    <sl-card class="card">
       <h2>Linha do tempo completa</h2>
       <ul class="timeline-lista">${renderTimelineCompleta(partida)}</ul>
-    </section>
+    </sl-card>
 
     <div class="botao-principal-wrap">
-      <button class="botao secundario ripple" id="btnVoltarSumula">Voltar ao placar</button>
+      <sl-button variant="primary" outline pill class="botao-full" id="btnVoltarSumula">Voltar ao placar</sl-button>
     </div>
   `;
 

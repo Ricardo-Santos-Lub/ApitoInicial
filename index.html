@@ -4,11 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ApitoInicial</title>
+  <link rel="stylesheet" href="vendor/shoelace/themes/light.css">
+  <link rel="stylesheet" href="css/shoelace-tema.css">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <meta name="theme-color" content="#1b8a4a">
+  <meta name="theme-color" content="#0a58ff">
+  <!-- Precisa ser um caminho absoluto (começando com "/"): o autoloader do Shoelace usa
+       import() dinâmico por trás dos panos, e import() não resolve caminhos relativos "soltos". -->
+  <script type="module" src="/vendor/shoelace/shoelace-autoloader.js"></script>
 </head>
 <body>
   <header class="app-header">

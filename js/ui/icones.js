@@ -5,8 +5,6 @@ function svg(paths, viewBox = "0 0 24 24") {
   return `<svg class="icone" viewBox="${viewBox}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
 }
 
-export const iconeVoltar = svg('<path d="M15 18l-6-6 6-6"/>');
-
 export const iconeEstatisticas = svg(
   '<path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/>'
 );

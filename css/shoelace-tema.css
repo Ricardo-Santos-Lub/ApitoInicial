@@ -1,0 +1,57 @@
+/* Retema o Shoelace pro azul vivo do app (em vez do "sky" padrão da lib).
+   Shoelace deriva a cor de cada componente da escala --sl-color-primary-50..950,
+   então sobrescrevemos a escala inteira em vez de uma única variável. */
+:root,
+.sl-theme-light {
+  --sl-color-primary-50: hsl(221 100% 97%);
+  --sl-color-primary-100: hsl(221 96% 93%);
+  --sl-color-primary-200: hsl(221 96% 87%);
+  --sl-color-primary-300: hsl(221 96% 78%);
+  --sl-color-primary-400: hsl(221 97% 68%);
+  --sl-color-primary-500: hsl(221 98% 60%);
+  --sl-color-primary-600: hsl(221 100% 52%);
+  --sl-color-primary-700: hsl(221 90% 44%);
+  --sl-color-primary-800: hsl(221 82% 36%);
+  --sl-color-primary-900: hsl(221 75% 28%);
+  --sl-color-primary-950: hsl(221 70% 18%);
+}
+
+.sl-theme-dark {
+  --sl-color-primary-50: hsl(221 70% 14%);
+  --sl-color-primary-100: hsl(221 75% 20%);
+  --sl-color-primary-200: hsl(221 80% 28%);
+  --sl-color-primary-300: hsl(221 85% 38%);
+  --sl-color-primary-400: hsl(221 90% 48%);
+  --sl-color-primary-500: hsl(221 95% 58%);
+  --sl-color-primary-600: hsl(221 100% 68%);
+  --sl-color-primary-700: hsl(221 100% 78%);
+  --sl-color-primary-800: hsl(221 100% 86%);
+  --sl-color-primary-900: hsl(221 100% 92%);
+  --sl-color-primary-950: hsl(221 100% 96%);
+}
+
+/* --sl-input-focus-ring-color vem com um azul-céu fixo no tema padrão, independente da
+   escala --sl-color-primary-*, então precisa ser realinhado à mão. Os demais campos de
+   input (borda, fundo, raio) passam a usar os mesmos tokens do resto do app. */
+:root {
+  --sl-input-focus-ring-color: color-mix(in srgb, var(--sl-color-primary-500) 40%, transparent);
+  --sl-input-border-color: var(--md-outline);
+  --sl-input-background-color: var(--md-surface);
+  --sl-input-border-radius-medium: var(--shape-xs);
+  --sl-input-height-medium: 2.6rem;
+}
+
+/* sl-card usa a mesma superfície/contorno do resto do app, não o cinza padrão da lib. */
+sl-card {
+  --sl-panel-background-color: var(--md-surface-container);
+  --border-color: var(--md-outline-variant);
+  --border-radius: var(--shape-md);
+  --border-width: 1px;
+  --padding: 1rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+sl-card::part(base) {
+  box-shadow: var(--elevation-1);
+}

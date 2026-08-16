@@ -26,6 +26,13 @@ import { renderSumula } from "./ui/sumula.js";
 import { ativarRipple } from "./ui/ripple.js";
 import { iconeInicio } from "./ui/icones.js";
 
+// O Shoelace usa uma classe pra alternar tema (não detecta prefers-color-scheme sozinho),
+// então espelhamos aqui a mesma preferência que o resto do app já segue via @media.
+const consultaTemaEscuro = window.matchMedia("(prefers-color-scheme: dark)");
+const aplicarTemaShoelace = () => document.documentElement.classList.toggle("sl-theme-dark", consultaTemaEscuro.matches);
+aplicarTemaShoelace();
+consultaTemaEscuro.addEventListener("change", aplicarTemaShoelace);
+
 let partida = carregar() || criarPartidaVazia();
 let telaAtual = partida.status === "nao_iniciada" ? "config" : "placar";
 

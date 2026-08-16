@@ -1,8 +1,17 @@
 // Service worker do ApitoInicial: cache-first pros arquivos do próprio app, pra funcionar
 // em campo mesmo sem internet depois da primeira visita. Sobe CACHE_NAME a cada mudança
 // de arquivos estáticos pra forçar os clientes a buscar a versão nova.
-const CACHE_NAME = "apitoinicial-v1";
-const ARQUIVOS_ESSENCIAIS = ["./", "./index.html", "./manifest.json", "./css/style.css", "./js/main.js"];
+const CACHE_NAME = "apitoinicial-v2";
+const ARQUIVOS_ESSENCIAIS = [
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./css/style.css",
+  "./css/shoelace-tema.css",
+  "./js/main.js",
+  "./vendor/shoelace/shoelace-autoloader.js",
+  "./vendor/shoelace/themes/light.css"
+];
 
 self.addEventListener("install", (evento) => {
   evento.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ARQUIVOS_ESSENCIAIS)));

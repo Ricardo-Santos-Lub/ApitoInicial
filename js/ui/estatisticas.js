@@ -2,7 +2,6 @@
 
 import { ativarRipple } from "./ripple.js";
 import { calcularEstatisticas } from "../logica/estatisticas.js";
-import { iconeVoltar } from "./icones.js";
 import { escapeHtml } from "./dom.js";
 
 export function renderEstatisticas(partida, callbacks) {
@@ -11,28 +10,28 @@ export function renderEstatisticas(partida, callbacks) {
 
   app.innerHTML = `
     <div class="cabecalho-tela">
-      <button class="botao-voltar ripple" id="btnVoltarTopo" title="Voltar ao placar">${iconeVoltar}</button>
+      <sl-icon-button class="botao-voltar" name="chevron-left" label="Voltar ao placar" id="btnVoltarTopo"></sl-icon-button>
       <h2>⚽ Estatísticas</h2>
     </div>
 
-    <section class="card">
+    <sl-card class="card">
       <p class="status-partida">
         ${escapeHtml(partida.times.casa.nome)} ${partida.placar.casa} x ${partida.placar.visitante} ${escapeHtml(partida.times.visitante.nome)}
       </p>
-    </section>
+    </sl-card>
 
-    <section class="card" style="--cor-time:${partida.times.casa.cor}">
+    <sl-card class="card" style="--cor-time:${partida.times.casa.cor}">
       <h2 class="titulo-time-cor">${escapeHtml(partida.times.casa.nome)}</h2>
       ${renderListaEstatisticas(partida, "casa")}
-    </section>
+    </sl-card>
 
-    <section class="card" style="--cor-time:${partida.times.visitante.cor}">
+    <sl-card class="card" style="--cor-time:${partida.times.visitante.cor}">
       <h2 class="titulo-time-cor">${escapeHtml(partida.times.visitante.nome)}</h2>
       ${renderListaEstatisticas(partida, "visitante")}
-    </section>
+    </sl-card>
 
     <div class="botao-principal-wrap">
-      <button class="botao secundario ripple" id="btnVoltarPlacar">Voltar ao placar</button>
+      <sl-button variant="primary" outline pill class="botao-full" id="btnVoltarPlacar">Voltar ao placar</sl-button>
     </div>
   `;
 
