@@ -105,8 +105,12 @@ export function iniciarSegundoTempo(partida) {
   return marcarInicioCronometro({ ...partida, status: "em_andamento", tempo: "2_tempo", minutoAtual: 0, segundoAtual: 0 });
 }
 
+// Zera o relógio (mostrado como contagem regressiva na UI: decorrido = duração inteira
+// vira 00:00 restante) e para de vez — não faz sentido mostrar tempo sobrando numa
+// partida já encerrada, mesmo que o botão tenha sido apertado antes do tempo esgotar.
 export function encerrarPartida(partida) {
-  return pausarCronometro({ ...partida, status: "encerrada" });
+  const duracaoMinutos = partida.formato.duracaoMinutos ?? 0;
+  return pausarCronometro({ ...partida, status: "encerrada", minutoAtual: duracaoMinutos, segundoAtual: 0 });
 }
 
 // Ancora tempoBaseSegundos/tempoInicioEpoch no minuto:segundo atuais de `partida`.

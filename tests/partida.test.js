@@ -113,6 +113,14 @@ test("encerrarPartida pausa o cronômetro definitivamente", () => {
   assert.equal(p.tempoInicioEpoch, null);
 });
 
+test("encerrarPartida zera o relógio (tempo restante) mesmo se sobrava tempo", () => {
+  let p = iniciarPartida(criarPartidaVazia()); // duração padrão: 20 minutos
+  p = { ...p, minutoAtual: 5, segundoAtual: 30 }; // encerrou com 14:30 restantes
+  p = encerrarPartida(p);
+  assert.equal(p.minutoAtual, 20);
+  assert.equal(p.segundoAtual, 0);
+});
+
 test("validarPartida exige duração de cada tempo maior que zero", () => {
   const p = definirDuracao(criarPartidaVazia(), 0);
   assert.match(validarPartida(p), /duração de cada tempo/);
