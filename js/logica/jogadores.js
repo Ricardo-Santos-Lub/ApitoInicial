@@ -15,6 +15,10 @@ export function adicionarJogador(partida, timeId, nome, numero) {
   };
 }
 
+export function numeroJaUsado(partida, timeId, numero) {
+  return partida.times[timeId].jogadores.some((j) => j.numero === numero);
+}
+
 export function removerJogador(partida, timeId, jogadorId) {
   return {
     ...partida,

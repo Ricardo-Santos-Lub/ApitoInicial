@@ -3,6 +3,7 @@
 import { ativarRipple } from "./ripple.js";
 import { calcularEstatisticas } from "../logica/estatisticas.js";
 import { iconeVoltar } from "./icones.js";
+import { escapeHtml } from "./dom.js";
 
 export function renderEstatisticas(partida, callbacks) {
   const app = document.getElementById("app");
@@ -50,7 +51,7 @@ function renderListaEstatisticas(partida, timeId) {
     .map(
       (s) => `
       <li class="item-estatistica">
-        <span>${s.numero ? `<span class="badge-numero">${s.numero}</span> ` : ""}${escapeHtml(s.nome)}</span>
+        <span>${s.numero != null ? `<span class="badge-numero">${s.numero}</span> ` : ""}${escapeHtml(s.nome)}</span>
         <span class="tags-estatistica">
           ${s.gols ? `<span class="tag-stat">⚽ ${s.gols}</span>` : ""}
         </span>
@@ -61,8 +62,3 @@ function renderListaEstatisticas(partida, timeId) {
   return `<ul class="lista-jogadores">${itens}</ul>`;
 }
 
-function escapeHtml(texto) {
-  const div = document.createElement("div");
-  div.textContent = texto;
-  return div.innerHTML;
-}

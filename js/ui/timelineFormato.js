@@ -1,6 +1,7 @@
 // Formatação de eventos compartilhada entre a tela de placar e a súmula final.
 
 import { buscarJogador } from "../logica/eventos.js";
+import { escapeHtml } from "./dom.js";
 
 export const ICONE_EVENTO = {
   gol: "⚽",
@@ -23,8 +24,3 @@ export function descreverEvento(partida, evento) {
   return `${escapeHtml(jogador?.nome ?? "?")} <span class="timeline-time">(${escapeHtml(time.nome)})</span>`;
 }
 
-function escapeHtml(texto) {
-  const div = document.createElement("div");
-  div.textContent = texto;
-  return div.innerHTML;
-}

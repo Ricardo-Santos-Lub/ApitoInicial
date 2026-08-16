@@ -10,6 +10,8 @@ export function criarPartidaVazia() {
     tempo: "1_tempo", // 1_tempo | 2_tempo
     minutoAtual: 0,
     segundoAtual: 0,
+    tempoBaseSegundos: 0, // segundos acumulados até a última referência de tempo real
+    tempoInicioEpoch: null, // Date.now() de quando o cronômetro atual começou a correr; null quando parado
     proximoJogadorId: 1,
     proximoEventoId: 1,
     modoFormacao: "manual", // manual | sorteio
@@ -55,39 +57,63 @@ export function definirTime(partida, timeId, dados) {
 }
 
 export function iniciarPartida(partida) {
-  return { ...partida, status: "em_andamento" };
+  return marcarInicioCronometro({ ...partida, status: "em_andamento" });
 }
 
 export function ajustarMinuto(partida, delta) {
-  return { ...partida, minutoAtual: Math.max(0, partida.minutoAtual + delta) };
+  return corrigirMinuto(partida, Math.max(0, partida.minutoAtual + delta));
 }
 
 export function definirMinuto(partida, minuto) {
-  return { ...partida, minutoAtual: Math.max(0, minuto) };
+  return corrigirMinuto(partida, Math.max(0, minuto));
 }
 
 // Chamada a cada segundo pelo cronômetro enquanto a partida está em andamento.
-// Fora desse status, o relógio fica parado (retorna a mesma referência, sem re-render).
+// Calcula o minuto a partir do relógio real (Date.now()) em vez de só somar +1 a cada
+// chamada — assim o cronômetro não atrasa quando a aba fica em segundo plano/bloqueada
+// (o navegador atrasa ou pausa o setInterval, mas o tempo real continua passando) e se
+// autocorrige caso a partida seja recarregada com uma referência de tempo antiga/ausente.
 export function avancarSegundo(partida) {
   if (partida.status !== "em_andamento") return partida;
-  const totalSegundos = partida.minutoAtual * 60 + partida.segundoAtual + 1;
-  return {
-    ...partida,
-    minutoAtual: Math.floor(totalSegundos / 60),
-    segundoAtual: totalSegundos % 60
-  };
+  if (partida.tempoInicioEpoch == null) return marcarInicioCronometro(partida);
+
+  const totalSegundos = partida.tempoBaseSegundos + Math.floor((Date.now() - partida.tempoInicioEpoch) / 1000);
+  const minutoAtual = Math.floor(totalSegundos / 60);
+  const segundoAtual = totalSegundos % 60;
+  if (minutoAtual === partida.minutoAtual && segundoAtual === partida.segundoAtual) return partida;
+  return { ...partida, minutoAtual, segundoAtual };
 }
 
 export function encerrarPrimeiroTempo(partida) {
-  return { ...partida, status: "intervalo" };
+  return pausarCronometro({ ...partida, status: "intervalo" });
 }
 
 export function iniciarSegundoTempo(partida) {
-  return { ...partida, status: "em_andamento", tempo: "2_tempo", minutoAtual: 0, segundoAtual: 0 };
+  return marcarInicioCronometro({ ...partida, status: "em_andamento", tempo: "2_tempo", minutoAtual: 0, segundoAtual: 0 });
 }
 
 export function encerrarPartida(partida) {
-  return { ...partida, status: "encerrada" };
+  return pausarCronometro({ ...partida, status: "encerrada" });
+}
+
+// Corrige o minuto exibido e, se o cronômetro estiver correndo, reancora a referência de
+// tempo real nesse novo valor — senão o próximo tick recalcularia a partir da base antiga.
+function corrigirMinuto(partida, minutoAtual) {
+  const corrigida = { ...partida, minutoAtual };
+  return partida.status === "em_andamento" ? marcarInicioCronometro(corrigida) : corrigida;
+}
+
+// Ancora tempoBaseSegundos/tempoInicioEpoch no minuto:segundo atuais de `partida`.
+function marcarInicioCronometro(partida) {
+  return {
+    ...partida,
+    tempoBaseSegundos: partida.minutoAtual * 60 + partida.segundoAtual,
+    tempoInicioEpoch: Date.now()
+  };
+}
+
+function pausarCronometro(partida) {
+  return { ...partida, tempoBaseSegundos: partida.minutoAtual * 60 + partida.segundoAtual, tempoInicioEpoch: null };
 }
 
 export function validarPartida(partida) {

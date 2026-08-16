@@ -4,6 +4,7 @@ import { ativarRipple } from "./ripple.js";
 import { buscarJogador } from "../logica/eventos.js";
 import { ICONE_EVENTO, ROTULO_TEMPO_CURTO, descreverEvento } from "./timelineFormato.js";
 import { iconeEstatisticas, iconeEditar } from "./icones.js";
+import { escapeHtml } from "./dom.js";
 
 const ROTULO_TEMPO = {
   "1_tempo": "1º Tempo",
@@ -191,7 +192,7 @@ function renderListaSelecaoJogador(partida, atributoData, { timeIdFiltro = null,
 }
 
 function rotuloJogador(jogador) {
-  return jogador.numero
+  return jogador.numero != null
     ? `<span class="badge-numero">${jogador.numero}</span> ${escapeHtml(jogador.nome)}`
     : escapeHtml(jogador.nome);
 }
@@ -266,15 +267,16 @@ function vincularEventos(app, partida, uiState, callbacks) {
   });
 
   app.querySelectorAll("[data-remover-evento]").forEach((btn) => {
-    btn.addEventListener("click", () => callbacks.onRemoverEvento(parseInt(btn.dataset.removerEvento, 10)));
+    btn.addEventListener("click", () => {
+      const eventoId = parseInt(btn.dataset.removerEvento, 10);
+      const evento = partida.eventos.find((e) => e.id === eventoId);
+      const mensagem = evento?.tipo === "substituicao" ? "Remover esta substituição da linha do tempo?" : "Remover este gol da linha do tempo?";
+      if (!confirm(mensagem)) return;
+      callbacks.onRemoverEvento(eventoId);
+    });
   });
 
   app.querySelector("#btnVerEstatisticas").addEventListener("click", callbacks.onVerEstatisticas);
   app.querySelector("#btnEditarTimes").addEventListener("click", callbacks.onEditarTimes);
 }
 
-function escapeHtml(texto) {
-  const div = document.createElement("div");
-  div.textContent = texto;
-  return div.innerHTML;
-}

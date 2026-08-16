@@ -17,6 +17,7 @@ import { sortearTimes } from "./logica/sorteio.js";
 import { sortearTitularesTime } from "./logica/titulares.js";
 import { registrarGol, registrarSubstituicao, removerEvento } from "./logica/eventos.js";
 import { salvar, carregar } from "./storage.js";
+import { manterTelaLigada, liberarTelaLigada } from "./wakeLock.js";
 import { renderTelaConfig } from "./ui/telaConfig.js";
 import { renderPlacar, atualizarRelogio } from "./ui/placar.js";
 import { renderEstatisticas } from "./ui/estatisticas.js";
@@ -33,6 +34,13 @@ let formatoConfirmado = partida.times.casa.nome.trim() !== "" || partida.times.v
 
 function renderizar() {
   salvar(partida);
+
+  if (partida.status === "em_andamento") {
+    manterTelaLigada();
+  } else {
+    liberarTelaLigada();
+  }
+
   if (telaAtual === "config") {
     renderTelaConfig(partida, formatoConfirmado, callbacksConfig);
   } else if (telaAtual === "estatisticas") {
@@ -227,3 +235,11 @@ setInterval(() => {
   salvar(partida);
   atualizarRelogio(partida);
 }, 1000);
+
+// A Wake Lock é liberada automaticamente pelo navegador quando a aba perde
+// visibilidade (troca de app, tela bloqueada) — precisa reativar ao voltar.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && partida.status === "em_andamento") {
+    manterTelaLigada();
+  }
+});

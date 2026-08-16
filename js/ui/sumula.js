@@ -5,6 +5,7 @@ import { ativarRipple } from "./ripple.js";
 import { calcularEstatisticas } from "../logica/estatisticas.js";
 import { ICONE_EVENTO, ROTULO_TEMPO_CURTO, descreverEvento } from "./timelineFormato.js";
 import { iconeVoltar } from "./icones.js";
+import { escapeHtml } from "./dom.js";
 
 export function renderSumula(partida, callbacks) {
   const app = document.getElementById("app");
@@ -74,7 +75,7 @@ function renderEscalacao(partida, timeId) {
   const titulares = partida.times[timeId].jogadores.filter((j) => j.titular);
   const reservas = partida.times[timeId].jogadores.filter((j) => !j.titular);
 
-  const item = (j) => `<li><span>${j.numero ? `<span class="badge-numero">${j.numero}</span> ` : ""}${escapeHtml(j.nome)}</span></li>`;
+  const item = (j) => `<li><span>${j.numero != null ? `<span class="badge-numero">${j.numero}</span> ` : ""}${escapeHtml(j.nome)}</span></li>`;
 
   const listaTitulares = titulares.length
     ? titulares.map(item).join("")
@@ -101,7 +102,7 @@ function renderListaEstatisticas(partida, timeId) {
     .map(
       (s) => `
       <li class="item-estatistica">
-        <span>${s.numero ? `<span class="badge-numero">${s.numero}</span> ` : ""}${escapeHtml(s.nome)}</span>
+        <span>${s.numero != null ? `<span class="badge-numero">${s.numero}</span> ` : ""}${escapeHtml(s.nome)}</span>
         <span class="tags-estatistica">
           ${s.gols ? `<span class="tag-stat">⚽ ${s.gols}</span>` : ""}
         </span>
@@ -134,8 +135,3 @@ function formatarData(dataIso) {
   return `${dia}/${mes}/${ano}`;
 }
 
-function escapeHtml(texto) {
-  const div = document.createElement("div");
-  div.textContent = texto;
-  return div.innerHTML;
-}

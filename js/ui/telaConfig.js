@@ -2,6 +2,8 @@
 // Só este tipo de arquivo pode tocar em document.*.
 
 import { ativarRipple } from "./ripple.js";
+import { numeroJaUsado } from "../logica/jogadores.js";
+import { escapeHtml } from "./dom.js";
 
 export function renderTelaConfig(partida, formatoConfirmado, callbacks) {
   const app = document.getElementById("app");
@@ -95,6 +97,7 @@ function renderTimeCard(partida, timeId, titulo) {
           <input type="number" placeholder="Nº" id="novoNumero-${timeId}" min="1" max="99">
           <button class="botao pequeno ripple" data-adicionar="${timeId}">Adicionar</button>
         </div>
+        <p class="erro" id="msgErroJogador-${timeId}"></p>
       </div>
     </div>
   `;
@@ -199,7 +202,7 @@ function renderListaPool(partida) {
 }
 
 function rotuloJogador(jogador) {
-  if (jogador.numero) return `<span class="badge-numero">${jogador.numero}</span> ${escapeHtml(jogador.nome)}`;
+  if (jogador.numero != null) return `<span class="badge-numero">${jogador.numero}</span> ${escapeHtml(jogador.nome)}`;
   if (jogador.nivel) return `${escapeHtml(jogador.nome)} <span class="nivel-tag">nível ${jogador.nivel}</span>`;
   return escapeHtml(jogador.nome);
 }
@@ -230,9 +233,21 @@ function vincularEventos(app, partida, callbacks) {
     app.querySelector(`[data-adicionar="${timeId}"]`)?.addEventListener("click", () => {
       const nomeInput = app.querySelector(`#novoNome-${timeId}`);
       const numeroInput = app.querySelector(`#novoNumero-${timeId}`);
+      const msgErroJogador = app.querySelector(`#msgErroJogador-${timeId}`);
       const nome = nomeInput.value.trim();
       const numero = parseInt(numeroInput.value, 10);
-      if (!nome || !numero) return;
+
+      msgErroJogador?.classList.remove("visivel");
+      if (!nome || Number.isNaN(numero)) return;
+
+      if (numeroJaUsado(partida, timeId, numero)) {
+        if (msgErroJogador) {
+          msgErroJogador.textContent = `Já existe um jogador com a camisa nº ${numero} nesse time.`;
+          msgErroJogador.classList.add("visivel");
+        }
+        return;
+      }
+
       callbacks.onAdicionarJogador(timeId, nome, numero);
     });
   });
@@ -270,8 +285,3 @@ function vincularEventos(app, partida, callbacks) {
   });
 }
 
-function escapeHtml(texto) {
-  const div = document.createElement("div");
-  div.textContent = texto;
-  return div.innerHTML;
-}
