@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   criarPartidaVazia,
   definirFormato,
+  definirDuracao,
   definirModoFormacao,
   definirTime,
   iniciarPartida,
@@ -28,6 +29,12 @@ test("criarPartidaVazia começa não iniciada, zerada e sem cronômetro correndo
 test("definirFormato só troca jogadoresPorTime, preserva o resto", () => {
   const p = definirFormato(criarPartidaVazia(), 7);
   assert.equal(p.formato.jogadoresPorTime, 7);
+});
+
+test("definirDuracao só troca duracaoMinutos, preserva o resto", () => {
+  const p = definirDuracao(criarPartidaVazia(), 30);
+  assert.equal(p.formato.duracaoMinutos, 30);
+  assert.equal(p.formato.jogadoresPorTime, 10);
 });
 
 test("definirModoFormacao zera os jogadores dos dois times ao trocar de modo", () => {
@@ -122,6 +129,11 @@ test("encerrarPartida pausa o cronômetro definitivamente", () => {
   p = encerrarPartida(p);
   assert.equal(p.status, "encerrada");
   assert.equal(p.tempoInicioEpoch, null);
+});
+
+test("validarPartida exige duração de cada tempo maior que zero", () => {
+  const p = definirDuracao(criarPartidaVazia(), 0);
+  assert.match(validarPartida(p), /duração de cada tempo/);
 });
 
 test("validarPartida exige nome dos dois times", () => {

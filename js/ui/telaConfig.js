@@ -12,8 +12,9 @@ export function renderTelaConfig(partida, formatoConfirmado, callbacks) {
   if (!formatoConfirmado) {
     app.innerHTML = renderPerguntaFormato(partida);
     app.querySelector("#btnConfirmarFormato").addEventListener("click", () => {
-      const valor = parseInt(app.querySelector("#jogadoresPorTimeInicial").value, 10) || 1;
-      callbacks.onConfirmarFormato(valor);
+      const jogadoresPorTime = parseInt(app.querySelector("#jogadoresPorTimeInicial").value, 10) || 1;
+      const duracaoMinutos = parseInt(app.querySelector("#duracaoInicial").value, 10) || 1;
+      callbacks.onConfirmarFormato(jogadoresPorTime, duracaoMinutos);
     });
     ativarRipple(app);
     return;
@@ -27,6 +28,10 @@ export function renderTelaConfig(partida, formatoConfirmado, callbacks) {
       <div class="campo">
         <label for="jogadoresPorTime">Jogadores por time (em campo)</label>
         <input type="number" id="jogadoresPorTime" min="1" max="11" value="${partida.formato.jogadoresPorTime}">
+      </div>
+      <div class="campo">
+        <label for="duracaoTempo">Duração de cada tempo (minutos)</label>
+        <input type="number" id="duracaoTempo" min="1" max="90" value="${partida.formato.duracaoMinutos ?? 20}" ${jaComecou ? "disabled" : ""}>
       </div>
     </section>
 
@@ -57,6 +62,10 @@ function renderPerguntaFormato(partida) {
       <div class="campo">
         <label for="jogadoresPorTimeInicial">Jogadores por time (em campo)</label>
         <input type="number" id="jogadoresPorTimeInicial" min="1" max="11" value="${partida.formato.jogadoresPorTime}">
+      </div>
+      <div class="campo">
+        <label for="duracaoInicial">Duração de cada tempo (minutos)</label>
+        <input type="number" id="duracaoInicial" min="1" max="90" value="${partida.formato.duracaoMinutos ?? 20}">
       </div>
     </section>
 
@@ -215,6 +224,11 @@ function vincularEventos(app, partida, callbacks) {
   app.querySelector("#jogadoresPorTime").addEventListener("change", (e) => {
     const valor = parseInt(e.target.value, 10) || 1;
     callbacks.onAtualizarFormato(valor);
+  });
+
+  app.querySelector("#duracaoTempo")?.addEventListener("change", (e) => {
+    const valor = parseInt(e.target.value, 10) || 1;
+    callbacks.onAtualizarDuracao(valor);
   });
 
   app.querySelector("#btnModoManual").addEventListener("click", () => callbacks.onMudarModo("manual"));

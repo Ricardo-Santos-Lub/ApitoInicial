@@ -5,10 +5,10 @@ export function criarPartidaVazia() {
   return {
     id: Date.now(),
     data: dataLocalHoje(),
-    formato: { jogadoresPorTime: 10 },
+    formato: { jogadoresPorTime: 10, duracaoMinutos: 20 },
     status: "nao_iniciada", // nao_iniciada | em_andamento | intervalo | encerrada
     tempo: "1_tempo", // 1_tempo | 2_tempo
-    minutoAtual: 0,
+    minutoAtual: 0, // tempo decorrido no tempo atual (a UI mostra a contagem regressiva a partir da duração)
     segundoAtual: 0,
     tempoBaseSegundos: 0, // segundos acumulados até a última referência de tempo real
     tempoInicioEpoch: null, // Date.now() de quando o cronômetro atual começou a correr; null quando parado
@@ -29,6 +29,13 @@ export function definirFormato(partida, jogadoresPorTime) {
   return {
     ...partida,
     formato: { ...partida.formato, jogadoresPorTime }
+  };
+}
+
+export function definirDuracao(partida, duracaoMinutos) {
+  return {
+    ...partida,
+    formato: { ...partida.formato, duracaoMinutos }
   };
 }
 
@@ -117,6 +124,9 @@ function pausarCronometro(partida) {
 }
 
 export function validarPartida(partida) {
+  if (!partida.formato.duracaoMinutos || partida.formato.duracaoMinutos <= 0) {
+    return "Defina a duração de cada tempo.";
+  }
   if (!partida.times.casa.nome.trim() || !partida.times.visitante.nome.trim()) {
     return "Preencha o nome dos dois times.";
   }

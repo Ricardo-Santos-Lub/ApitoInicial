@@ -120,6 +120,32 @@ body {
   font-weight: 500;
 }
 
+.app-header-botao-inicio {
+  position: absolute;
+  top: 50%;
+  left: 0.9rem;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--md-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.app-header-botao-inicio:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.app-header-botao-inicio .icone {
+  width: 20px;
+  height: 20px;
+}
+
 main#app {
   padding: 1rem;
   max-width: 720px;
@@ -637,6 +663,45 @@ button.botao.secundario {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   color: var(--md-on-surface);
+}
+
+.relogio-circulo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 5px solid var(--md-primary);
+  background: var(--md-surface-container-high);
+  flex-shrink: 0;
+  transition: border-color 0.3s ease;
+}
+
+.relogio-circulo .relogio-grande {
+  min-width: 0;
+  font-size: 2rem;
+}
+
+.relogio-circulo-esgotado {
+  border-color: var(--md-error);
+  animation: pulso-tempo-esgotado 1.2s ease-in-out infinite;
+}
+
+@keyframes pulso-tempo-esgotado {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relogio-circulo-esgotado {
+    animation: none;
+  }
 }
 
 .correcao-minuto {

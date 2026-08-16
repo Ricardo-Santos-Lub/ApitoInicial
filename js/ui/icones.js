@@ -14,3 +14,7 @@ export const iconeEstatisticas = svg(
 export const iconeEditar = svg(
   '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>'
 );
+
+export const iconeInicio = svg(
+  '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>'
+);

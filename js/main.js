@@ -1,6 +1,7 @@
 import {
   criarPartidaVazia,
   definirFormato,
+  definirDuracao,
   definirModoFormacao,
   definirTime,
   iniciarPartida,
@@ -22,6 +23,8 @@ import { renderTelaConfig } from "./ui/telaConfig.js";
 import { renderPlacar, atualizarRelogio } from "./ui/placar.js";
 import { renderEstatisticas } from "./ui/estatisticas.js";
 import { renderSumula } from "./ui/sumula.js";
+import { ativarRipple } from "./ui/ripple.js";
+import { iconeInicio } from "./ui/icones.js";
 
 let partida = carregar() || criarPartidaVazia();
 let telaAtual = partida.status === "nao_iniciada" ? "config" : "placar";
@@ -53,14 +56,20 @@ function renderizar() {
 }
 
 const callbacksConfig = {
-  onConfirmarFormato: (valor) => {
-    partida = definirFormato(partida, valor);
+  onConfirmarFormato: (jogadoresPorTime, duracaoMinutos) => {
+    partida = definirFormato(partida, jogadoresPorTime);
+    partida = definirDuracao(partida, duracaoMinutos);
     formatoConfirmado = true;
     renderizar();
   },
 
   onAtualizarFormato: (valor) => {
     partida = definirFormato(partida, valor);
+    renderizar();
+  },
+
+  onAtualizarDuracao: (valor) => {
+    partida = definirDuracao(partida, valor);
     renderizar();
   },
 
@@ -195,12 +204,7 @@ const callbacksPlacar = {
   },
 
   onNovaPartida: () => {
-    partida = criarPartidaVazia();
-    telaAtual = "config";
-    formatoConfirmado = false;
-    painelAberto = null;
-    jogadorSaiSelecionado = null;
-    renderizar();
+    reiniciarApp();
   },
 
   onVerSumula: () => {
@@ -222,6 +226,26 @@ const callbacksSumula = {
     renderizar();
   }
 };
+
+function reiniciarApp() {
+  partida = criarPartidaVazia();
+  telaAtual = "config";
+  formatoConfirmado = false;
+  painelAberto = null;
+  jogadorSaiSelecionado = null;
+  renderizar();
+}
+
+// Botão do cabeçalho: fica fora do #app (não é redesenhado a cada tela), então é ligado
+// uma única vez aqui. Pede confirmação porque, diferente do "Nova Partida" (só aparece
+// com o jogo já encerrado), esse botão fica acessível o tempo todo, inclusive ao vivo.
+const btnVoltarInicio = document.getElementById("btnVoltarInicio");
+btnVoltarInicio.innerHTML = iconeInicio;
+ativarRipple(document.querySelector(".app-header"));
+btnVoltarInicio.addEventListener("click", () => {
+  if (!confirm("Voltar para o início? A partida atual (times, placar e eventos) será apagada.")) return;
+  reiniciarApp();
+});
 
 renderizar();
 
