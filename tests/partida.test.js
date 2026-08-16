@@ -7,8 +7,6 @@ import {
   definirModoFormacao,
   definirTime,
   iniciarPartida,
-  ajustarMinuto,
-  definirMinuto,
   avancarSegundo,
   encerrarPrimeiroTempo,
   iniciarSegundoTempo,
@@ -87,22 +85,6 @@ test("avancarSegundo se autocorrige quando tempoInicioEpoch está ausente (dado 
   assert.ok(p.tempoInicioEpoch != null);
   assert.equal(p.minutoAtual, 5);
   assert.equal(p.segundoAtual, 30);
-});
-
-test("ajustarMinuto não deixa o minuto ficar negativo", () => {
-  const p = ajustarMinuto(iniciarPartida(criarPartidaVazia()), -5);
-  assert.equal(p.minutoAtual, 0);
-});
-
-test("correção manual de minuto reancora o cronômetro (tick seguinte soma a partir do novo valor)", () => {
-  let p = iniciarPartida(criarPartidaVazia());
-  p = definirMinuto(p, 20);
-  assert.equal(p.minutoAtual, 20);
-
-  p = { ...p, tempoInicioEpoch: p.tempoInicioEpoch - 1000 };
-  p = avancarSegundo(p);
-  assert.equal(p.minutoAtual, 20);
-  assert.equal(p.segundoAtual, 1);
 });
 
 test("intervalo pausa o cronômetro e o 2º tempo reinicia do zero", () => {

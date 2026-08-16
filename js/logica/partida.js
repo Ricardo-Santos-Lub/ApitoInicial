@@ -67,14 +67,6 @@ export function iniciarPartida(partida) {
   return marcarInicioCronometro({ ...partida, status: "em_andamento" });
 }
 
-export function ajustarMinuto(partida, delta) {
-  return corrigirMinuto(partida, Math.max(0, partida.minutoAtual + delta));
-}
-
-export function definirMinuto(partida, minuto) {
-  return corrigirMinuto(partida, Math.max(0, minuto));
-}
-
 // Chamada a cada segundo pelo cronômetro enquanto a partida está em andamento.
 // Calcula o minuto a partir do relógio real (Date.now()) em vez de só somar +1 a cada
 // chamada — assim o cronômetro não atrasa quando a aba fica em segundo plano/bloqueada
@@ -101,13 +93,6 @@ export function iniciarSegundoTempo(partida) {
 
 export function encerrarPartida(partida) {
   return pausarCronometro({ ...partida, status: "encerrada" });
-}
-
-// Corrige o minuto exibido e, se o cronômetro estiver correndo, reancora a referência de
-// tempo real nesse novo valor — senão o próximo tick recalcularia a partir da base antiga.
-function corrigirMinuto(partida, minutoAtual) {
-  const corrigida = { ...partida, minutoAtual };
-  return partida.status === "em_andamento" ? marcarInicioCronometro(corrigida) : corrigida;
 }
 
 // Ancora tempoBaseSegundos/tempoInicioEpoch no minuto:segundo atuais de `partida`.

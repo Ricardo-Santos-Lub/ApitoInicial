@@ -38,17 +38,9 @@ export function renderPlacar(partida, uiState, callbacks) {
     <section class="card cronometro-card">
       <p class="badge-status">${rotuloStatus(partida)}</p>
       <div class="cronometro">
-        <button class="botao-minuto ripple" id="btnMenosMinuto" ${podeEditarMinuto(partida) ? "" : "disabled"}>−1</button>
         <div class="relogio-circulo ${tempoEsgotado(partida) ? "relogio-circulo-esgotado" : ""}" id="relogioCirculo">
           <div class="relogio-grande" id="relogioTexto">${formatarRelogio(partida)}</div>
         </div>
-        <button class="botao-minuto ripple" id="btnMaisMinuto" ${podeEditarMinuto(partida) ? "" : "disabled"}>+1</button>
-      </div>
-
-      <div class="correcao-minuto">
-        <label for="minutoRestante">Corrigir minutos restantes</label>
-        <input type="number" id="minutoRestante" class="input-minuto" value="${minutosRestantesInteiros(partida)}" min="0"
-          ${podeEditarMinuto(partida) ? "" : "disabled"}>
       </div>
 
       <div class="botoes-controle-tempo">
@@ -76,25 +68,19 @@ export function renderPlacar(partida, uiState, callbacks) {
 }
 
 // Atualização leve do cronômetro, chamada a cada segundo pelo tick em main.js.
-// Só troca o texto do relógio — não refaz o innerHTML da tela, pra não derrubar
-// o foco de quem estiver digitando no campo de correção de minuto.
+// Só troca o texto do relógio — não refaz o innerHTML da tela inteira.
 export function atualizarRelogio(partida) {
   const relogio = document.getElementById("relogioTexto");
   if (relogio) relogio.textContent = formatarRelogio(partida);
 
   const circulo = document.getElementById("relogioCirculo");
   if (circulo) circulo.classList.toggle("relogio-circulo-esgotado", tempoEsgotado(partida));
-
-  // Só sincroniza o campo de correção se ele não estiver em uso, senão apagaria o que a pessoa está digitando.
-  const inputMinuto = document.getElementById("minutoRestante");
-  if (inputMinuto && document.activeElement !== inputMinuto) {
-    inputMinuto.value = minutosRestantesInteiros(partida);
-  }
 }
 
 // partida.minutoAtual/segundoAtual guardam o tempo DECORRIDO (base do cronômetro à prova de
 // drift em logica/partida.js). O relógio exibido é regressivo: essas funções convertem pra
-// tempo restante só na hora de desenhar a tela, sem mudar o que fica salvo no estado.
+// tempo restante só na hora de desenhar a tela, sem mudar o que fica salvo no estado. O tempo
+// é definido só no começo (tela de configuração) — não dá pra corrigir manualmente durante o jogo.
 function duracaoSegundosTotal(partida) {
   return (partida.formato.duracaoMinutos ?? 20) * 60;
 }
@@ -102,10 +88,6 @@ function duracaoSegundosTotal(partida) {
 function segundosRestantes(partida) {
   const decorridos = partida.minutoAtual * 60 + partida.segundoAtual;
   return Math.max(0, duracaoSegundosTotal(partida) - decorridos);
-}
-
-function minutosRestantesInteiros(partida) {
-  return Math.floor(segundosRestantes(partida) / 60);
 }
 
 function tempoEsgotado(partida) {
@@ -123,10 +105,6 @@ function rotuloStatus(partida) {
   if (partida.status === "intervalo") return "Intervalo";
   if (partida.status === "encerrada") return "Partida encerrada";
   return ROTULO_TEMPO[partida.tempo];
-}
-
-function podeEditarMinuto(partida) {
-  return partida.status === "em_andamento";
 }
 
 function renderBotaoControleTempo(partida) {
@@ -246,24 +224,6 @@ function renderTimeline(partida) {
 // ===== Eventos DOM =====
 
 function vincularEventos(app, partida, uiState, callbacks) {
-  const btnMenos = app.querySelector("#btnMenosMinuto");
-  const btnMais = app.querySelector("#btnMaisMinuto");
-  const inputMinuto = app.querySelector("#minutoRestante");
-
-  // Os botões e o campo abaixo falam em tempo RESTANTE (o que a pessoa vê no relógio), mas
-  // ajustarMinuto/definirMinuto em logica/partida.js trabalham com tempo DECORRIDO — por
-  // isso os deltas e a conversão do valor digitado saem invertidos aqui.
-  if (btnMenos) btnMenos.addEventListener("click", () => callbacks.onAjustarMinuto(1));
-  if (btnMais) btnMais.addEventListener("click", () => callbacks.onAjustarMinuto(-1));
-  if (inputMinuto) {
-    inputMinuto.addEventListener("change", (e) => {
-      const restanteDigitado = parseInt(e.target.value, 10);
-      const restante = Number.isNaN(restanteDigitado) ? 0 : Math.max(0, restanteDigitado);
-      const duracaoMin = partida.formato.duracaoMinutos ?? 20;
-      callbacks.onDefinirMinuto(duracaoMin - restante);
-    });
-  }
-
   app.querySelector("#btnEncerrarTempo")?.addEventListener("click", callbacks.onEncerrarPrimeiroTempo);
   app.querySelector("#btnIniciarSegundoTempo")?.addEventListener("click", callbacks.onIniciarSegundoTempo);
   app.querySelector("#btnEncerrarPartida")?.addEventListener("click", callbacks.onEncerrarPartida);

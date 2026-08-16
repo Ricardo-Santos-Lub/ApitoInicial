@@ -6,8 +6,6 @@ import {
   definirTime,
   iniciarPartida,
   validarPartida,
-  ajustarMinuto,
-  definirMinuto,
   avancarSegundo,
   encerrarPrimeiroTempo,
   iniciarSegundoTempo,
@@ -130,16 +128,6 @@ const callbacksConfig = {
 };
 
 const callbacksPlacar = {
-  onAjustarMinuto: (delta) => {
-    partida = ajustarMinuto(partida, delta);
-    renderizar();
-  },
-
-  onDefinirMinuto: (minuto) => {
-    partida = definirMinuto(partida, minuto);
-    renderizar();
-  },
-
   onEncerrarPrimeiroTempo: () => {
     partida = encerrarPrimeiroTempo(partida);
     renderizar();

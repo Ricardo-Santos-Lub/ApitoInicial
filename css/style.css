@@ -636,25 +636,6 @@ button.botao.secundario {
   margin-bottom: 1rem;
 }
 
-.botao-minuto {
-  position: relative;
-  overflow: hidden;
-  min-width: 48px;
-  min-height: 48px;
-  border-radius: 50%;
-  border: none;
-  background: var(--md-secondary-container);
-  color: var(--md-on-secondary-container);
-  font-size: 1.1rem;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.botao-minuto:disabled {
-  opacity: 0.38;
-  cursor: not-allowed;
-}
-
 .relogio-grande {
   min-width: 132px;
   text-align: center;
@@ -702,42 +683,6 @@ button.botao.secundario {
   .relogio-circulo-esgotado {
     animation: none;
   }
-}
-
-.correcao-minuto {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.correcao-minuto label {
-  color: var(--md-on-surface-variant);
-  font-size: 0.8rem;
-}
-
-.input-minuto {
-  width: 64px;
-  text-align: center;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.3rem;
-  border-radius: var(--shape-xs);
-  border: 1px solid var(--md-outline);
-  background: var(--md-surface);
-  color: var(--md-on-surface);
-  font-family: inherit;
-}
-
-.input-minuto:focus {
-  outline: none;
-  border-color: var(--md-primary);
-  border-width: 2px;
-}
-
-.input-minuto:disabled {
-  opacity: 0.6;
 }
 
 .botoes-controle-tempo {

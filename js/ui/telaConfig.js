@@ -12,8 +12,16 @@ export function renderTelaConfig(partida, formatoConfirmado, callbacks) {
   if (!formatoConfirmado) {
     app.innerHTML = renderPerguntaFormato(partida);
     app.querySelector("#btnConfirmarFormato").addEventListener("click", () => {
-      const jogadoresPorTime = parseInt(app.querySelector("#jogadoresPorTimeInicial").value, 10) || 1;
-      const duracaoMinutos = parseInt(app.querySelector("#duracaoInicial").value, 10) || 1;
+      const jogadoresPorTime = parseInt(app.querySelector("#jogadoresPorTimeInicial").value, 10);
+      const duracaoMinutos = parseInt(app.querySelector("#duracaoInicial").value, 10);
+      const msgErro = app.querySelector("#msgErroFormato");
+
+      if (!jogadoresPorTime || !duracaoMinutos) {
+        msgErro.textContent = "Preencha os jogadores por time e a duração de cada tempo.";
+        msgErro.classList.add("visivel");
+        return;
+      }
+
       callbacks.onConfirmarFormato(jogadoresPorTime, duracaoMinutos);
     });
     ativarRipple(app);
@@ -61,15 +69,16 @@ function renderPerguntaFormato(partida) {
       </p>
       <div class="campo">
         <label for="jogadoresPorTimeInicial">Jogadores por time (em campo)</label>
-        <input type="number" id="jogadoresPorTimeInicial" min="1" max="11" value="${partida.formato.jogadoresPorTime}">
+        <input type="number" id="jogadoresPorTimeInicial" min="1" max="11" placeholder="Ex: 10">
       </div>
       <div class="campo">
         <label for="duracaoInicial">Duração de cada tempo (minutos)</label>
-        <input type="number" id="duracaoInicial" min="1" max="90" value="${partida.formato.duracaoMinutos ?? 20}">
+        <input type="number" id="duracaoInicial" min="1" max="90" placeholder="Ex: 20">
       </div>
     </section>
 
     <div class="botao-principal-wrap">
+      <p class="erro" id="msgErroFormato"></p>
       <button class="botao ripple" id="btnConfirmarFormato">Continuar</button>
     </div>
   `;
