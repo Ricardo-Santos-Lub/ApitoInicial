@@ -434,24 +434,24 @@ sl-icon-button[name="x-lg"] {
   flex-shrink: 0;
 }
 
-/* ===== Grupo de modo (sl-radio-group como segmented control) ===== */
-.modo-formacao {
-  display: flex;
-  width: 100%;
-  margin-bottom: 1rem;
-}
-
-.modo-formacao sl-radio-button {
-  flex: 1;
-}
-
-.modo-formacao sl-radio-button::part(button) {
-  width: 100%;
-}
-
 .nivel-tag {
   color: var(--md-on-surface-variant);
   font-size: 0.78rem;
+}
+
+.nome-jogador-pool[data-tocar-nivel] {
+  cursor: pointer;
+}
+
+.pool-item-controles {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.select-nivel-inline {
+  width: 8.5rem;
 }
 
 /* ===== Seletor de modo (segmented buttons) ===== */

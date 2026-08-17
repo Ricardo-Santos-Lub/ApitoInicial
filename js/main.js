@@ -2,7 +2,6 @@ import {
   criarPartidaVazia,
   definirFormato,
   definirDuracao,
-  definirModoFormacao,
   definirTime,
   definirTimeReserva,
   iniciarPartida,
@@ -12,7 +11,7 @@ import {
   iniciarSegundoTempo,
   encerrarPartida
 } from "./logica/partida.js";
-import { adicionarJogador, removerJogador, adicionarJogadorPool, removerJogadorPool } from "./logica/jogadores.js";
+import { adicionarJogadorPool, removerJogadorPool, atualizarNivelJogadorPool } from "./logica/jogadores.js";
 import { sortearTimes } from "./logica/sorteio.js";
 import { sortearTitularesTime } from "./logica/titulares.js";
 import { registrarGol, registrarSubstituicao, removerEvento } from "./logica/eventos.js";
@@ -44,6 +43,8 @@ let jogadorSaiSelecionado = null; // { timeId, jogadorId } durante o fluxo de su
 let penaltisTemp = { casa: 0, visitante: 0 };
 // Se os times já têm nome, a pergunta de formato já foi respondida numa sessão anterior.
 let formatoConfirmado = partida.times.casa.nome.trim() !== "" || partida.times.visitante.nome.trim() !== "" || partida.status !== "nao_iniciada";
+// Id do jogador do pool cujo nível está sendo editado inline (toque no nome); null = nenhum
+let editandoNivelPoolId = null;
 
 function renderizar() {
   salvar(partida);
@@ -55,7 +56,7 @@ function renderizar() {
   }
 
   if (telaAtual === "config") {
-    renderTelaConfig(partida, formatoConfirmado, callbacksConfig);
+    renderTelaConfig(partida, formatoConfirmado, editandoNivelPoolId, callbacksConfig);
   } else if (telaAtual === "estatisticas") {
     renderEstatisticas(partida, callbacksEstatisticas);
   } else if (telaAtual === "sumula") {
@@ -93,21 +94,6 @@ const callbacksConfig = {
     salvar(partida); // sem re-render aqui pra não perder o foco do input
   },
 
-  onAdicionarJogador: (timeId, nome, numero) => {
-    partida = adicionarJogador(partida, timeId, nome, numero);
-    renderizar();
-  },
-
-  onRemoverJogador: (timeId, jogadorId) => {
-    partida = removerJogador(partida, timeId, jogadorId);
-    renderizar();
-  },
-
-  onMudarModo: (modo) => {
-    partida = definirModoFormacao(partida, modo);
-    renderizar();
-  },
-
   onAdicionarJogadorPool: (nome, nivel) => {
     partida = adicionarJogadorPool(partida, nome, nivel);
     renderizar();
@@ -115,6 +101,17 @@ const callbacksConfig = {
 
   onRemoverJogadorPool: (jogadorId) => {
     partida = removerJogadorPool(partida, jogadorId);
+    renderizar();
+  },
+
+  onEditarNivelPool: (jogadorId) => {
+    editandoNivelPoolId = jogadorId;
+    renderizar();
+  },
+
+  onAtualizarNivelPool: (jogadorId, nivel) => {
+    partida = atualizarNivelJogadorPool(partida, jogadorId, nivel);
+    editandoNivelPoolId = null;
     renderizar();
   },
 
@@ -264,6 +261,7 @@ function reiniciarApp() {
   painelAberto = null;
   jogadorSaiSelecionado = null;
   penaltisTemp = { casa: 0, visitante: 0 };
+  editandoNivelPoolId = null;
   renderizar();
 }
 

@@ -47,3 +47,10 @@ export function removerJogadorPool(partida, jogadorId) {
     poolJogadores: partida.poolJogadores.filter((j) => j.id !== jogadorId)
   };
 }
+
+export function atualizarNivelJogadorPool(partida, jogadorId, nivel) {
+  return {
+    ...partida,
+    poolJogadores: partida.poolJogadores.map((j) => (j.id === jogadorId ? { ...j, nivel } : j))
+  };
+}

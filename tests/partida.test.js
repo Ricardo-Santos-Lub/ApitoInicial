@@ -36,7 +36,7 @@ test("definirDuracao só troca duracaoMinutos, preserva o resto", () => {
 });
 
 test("definirModoFormacao zera os jogadores dos dois times ao trocar de modo", () => {
-  let p = criarPartidaVazia();
+  let p = definirModoFormacao(criarPartidaVazia(), "manual");
   p = adicionarJogador(p, "casa", "Fulano", 9);
   assert.equal(p.times.casa.jogadores.length, 1);
 
@@ -47,7 +47,7 @@ test("definirModoFormacao zera os jogadores dos dois times ao trocar de modo", (
 
 test("definirModoFormacao é no-op se o modo já é o atual (não recria os times)", () => {
   const p = criarPartidaVazia();
-  const p2 = definirModoFormacao(p, "manual");
+  const p2 = definirModoFormacao(p, "sorteio");
   assert.equal(p, p2);
 });
 
@@ -134,10 +134,10 @@ test("validarPartida exige nome dos dois times", () => {
 test("validarPartida exige jogadores cadastrados (mensagem muda conforme o modo)", () => {
   let p = definirTime(criarPartidaVazia(), "casa", { nome: "A" });
   p = definirTime(p, "visitante", { nome: "B" });
-  assert.match(validarPartida(p), /Cadastre pelo menos 1 jogador/);
-
-  p = definirModoFormacao(p, "sorteio");
   assert.match(validarPartida(p), /Sorteie os times/);
+
+  p = definirModoFormacao(p, "manual");
+  assert.match(validarPartida(p), /Cadastre pelo menos 1 jogador/);
 });
 
 test("validarPartida rejeita mais titulares em campo do que o formato permite", () => {

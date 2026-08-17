@@ -15,7 +15,7 @@ export function criarPartidaVazia() {
     proximoJogadorId: 1,
     proximoEventoId: 1,
     proximoTimeReservaId: 1,
-    modoFormacao: "manual", // manual | sorteio
+    modoFormacao: "sorteio", // manual | sorteio — manual só existe internamente/nos testes; a UI só oferece sorteio
     poolJogadores: [], // jogadores sem time, usados só no modo sorteio
     times: {
       casa: { nome: "", cor: "#1e88e5", jogadores: [] },

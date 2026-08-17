@@ -2,10 +2,9 @@
 // Só este tipo de arquivo pode tocar em document.*.
 // Usa os web components do Shoelace (vendor/shoelace) pros controles de formulário.
 
-import { numeroJaUsado } from "../logica/jogadores.js";
 import { escapeHtml } from "./dom.js";
 
-export function renderTelaConfig(partida, formatoConfirmado, callbacks) {
+export function renderTelaConfig(partida, formatoConfirmado, editandoNivelPoolId, callbacks) {
   const app = document.getElementById("app");
   app.classList.remove("tem-nav-inferior");
 
@@ -42,12 +41,7 @@ export function renderTelaConfig(partida, formatoConfirmado, callbacks) {
       </div>
     </sl-card>
 
-    <sl-radio-group id="modoFormacao" value="${partida.modoFormacao}" class="modo-formacao">
-      <sl-radio-button value="manual">Cadastro manual</sl-radio-button>
-      <sl-radio-button value="sorteio">Sortear times</sl-radio-button>
-    </sl-radio-group>
-
-    ${partida.modoFormacao === "manual" ? renderModoManual(partida) : renderModoSorteio(partida)}
+    ${renderModoSorteio(partida, editandoNivelPoolId)}
 
     <div class="botao-principal-wrap">
       <p class="erro" id="msgErro"></p>
@@ -82,44 +76,7 @@ function renderPerguntaFormato(partida) {
   `;
 }
 
-function renderModoManual(partida) {
-  return `
-    <section class="times-grid">
-      ${renderTimeCard(partida, "casa", "Time da Casa")}
-      ${renderTimeCard(partida, "visitante", "Time Visitante")}
-    </section>
-  `;
-}
-
-function renderTimeCard(partida, timeId, titulo) {
-  const time = partida.times[timeId];
-
-  return `
-    <sl-card class="card time-card" style="--cor-time:${time.cor}">
-      <h2>${titulo}</h2>
-      <div class="campo">
-        <label for="nome-${timeId}">Nome do time</label>
-        <sl-input type="text" id="nome-${timeId}" value="${escapeHtml(time.nome)}" placeholder="Ex: Real Matismo"></sl-input>
-      </div>
-      <div class="campo">
-        <label for="cor-${timeId}">Cor</label>
-        <input type="color" id="cor-${timeId}" value="${time.cor}">
-      </div>
-
-      <div class="campo">
-        ${renderListasTitularesReservas(partida, timeId, { removivel: true })}
-        <div class="add-jogador-form">
-          <sl-input type="text" placeholder="Nome do jogador" id="novoNome-${timeId}"></sl-input>
-          <sl-input type="number" placeholder="Nº" id="novoNumero-${timeId}" min="1" max="99" class="input-numero"></sl-input>
-          <sl-button size="small" pill variant="primary" outline data-adicionar="${timeId}">Adicionar</sl-button>
-        </div>
-        <p class="erro" id="msgErroJogador-${timeId}"></p>
-      </div>
-    </sl-card>
-  `;
-}
-
-function renderModoSorteio(partida) {
+function renderModoSorteio(partida, editandoNivelPoolId) {
   return `
     <section class="times-grid">
       ${renderCabecalhoTime(partida, "casa", "Time da Casa")}
@@ -131,7 +88,7 @@ function renderModoSorteio(partida) {
     <sl-card class="card">
       <h2>Jogadores para sortear</h2>
       <p class="contador-jogadores">${partida.poolJogadores.length} jogador(es) cadastrado(s)</p>
-      <ul class="lista-jogadores">${renderListaPool(partida)}</ul>
+      <ul class="lista-jogadores">${renderListaPool(partida, editandoNivelPoolId)}</ul>
       <div class="add-jogador-form">
         <sl-input type="text" placeholder="Nome do jogador" id="novoNomePool"></sl-input>
         <sl-select id="novoNivelPool" value="3" class="select-nivel">
@@ -154,7 +111,7 @@ function renderCabecalhoTime(partida, timeId, titulo) {
   const time = partida.times[timeId];
 
   const conteudoRoster = time.jogadores.length
-    ? renderListasTitularesReservas(partida, timeId, { removivel: false })
+    ? renderListasTitularesReservas(partida, timeId)
     : `<p class="contador-jogadores">Aguardando sorteio</p><ul class="lista-jogadores"><li class="lista-vazia">Aguardando sorteio</li></ul>`;
 
   return `
@@ -218,17 +175,13 @@ function renderTimeReservaCard(partida, time) {
 }
 
 // Lista "Em campo" + "Reserva" de um time, com sorteio de titulares quando há gente sobrando.
-function renderListasTitularesReservas(partida, timeId, { removivel }) {
+function renderListasTitularesReservas(partida, timeId) {
   const time = partida.times[timeId];
   const limite = partida.formato.jogadoresPorTime;
   const titulares = time.jogadores.filter((j) => j.titular);
   const reservas = time.jogadores.filter((j) => !j.titular);
 
-  const itemHtml = (j) => `
-    <li>
-      <span>${rotuloJogador(j)}</span>
-      ${removivel ? `<sl-icon-button name="x-lg" label="Remover jogador" data-remover="${timeId}:${j.id}"></sl-icon-button>` : ""}
-    </li>`;
+  const itemHtml = (j) => `<li><span>${rotuloJogador(j)}</span></li>`;
 
   const listaTitularesHtml = titulares.length
     ? titulares.map(itemHtml).join("")
@@ -248,19 +201,39 @@ function renderListasTitularesReservas(partida, timeId, { removivel }) {
   `;
 }
 
-function renderListaPool(partida) {
+function renderListaPool(partida, editandoNivelPoolId) {
   if (!partida.poolJogadores.length) {
     return `<li class="lista-vazia">Nenhum jogador cadastrado</li>`;
   }
-  return partida.poolJogadores
-    .map(
-      (j) => `
+  return partida.poolJogadores.map((j) => renderItemPool(j, editandoNivelPoolId)).join("");
+}
+
+// Toque no nome entra em modo de edição do nível, trocando a tag de texto por um sl-select.
+function renderItemPool(jogador, editandoNivelPoolId) {
+  const editando = jogador.id === editandoNivelPoolId;
+
+  const nomeHtml = editando
+    ? `<span class="nome-jogador-pool">${escapeHtml(jogador.nome)}</span>`
+    : `<span class="nome-jogador-pool" data-tocar-nivel="${jogador.id}">${escapeHtml(jogador.nome)} <span class="nivel-tag">nível ${jogador.nivel}</span></span>`;
+
+  const selectHtml = editando
+    ? `<sl-select value="${jogador.nivel}" size="small" class="select-nivel-inline" data-editar-nivel="${jogador.id}">
+          <sl-option value="1">Nível 1</sl-option>
+          <sl-option value="2">Nível 2</sl-option>
+          <sl-option value="3">Nível 3</sl-option>
+          <sl-option value="4">Nível 4</sl-option>
+          <sl-option value="5">Nível 5</sl-option>
+        </sl-select>`
+    : "";
+
+  return `
       <li>
-        <span>${escapeHtml(j.nome)} <span class="nivel-tag">nível ${j.nivel}</span></span>
-        <sl-icon-button name="x-lg" label="Remover jogador" data-remover-pool="${j.id}"></sl-icon-button>
-      </li>`
-    )
-    .join("");
+        ${nomeHtml}
+        <span class="pool-item-controles">
+          ${selectHtml}
+          <sl-icon-button name="x-lg" label="Remover jogador" data-remover-pool="${jogador.id}"></sl-icon-button>
+        </span>
+      </li>`;
 }
 
 function rotuloJogador(jogador) {
@@ -284,10 +257,6 @@ function vincularEventos(app, partida, callbacks) {
     callbacks.onAtualizarDuracao(valor);
   });
 
-  app.querySelector("#modoFormacao").addEventListener("sl-change", (e) => {
-    callbacks.onMudarModo(e.target.value);
-  });
-
   ["casa", "visitante"].forEach((timeId) => {
     app.querySelector(`#nome-${timeId}`).addEventListener("sl-input", (e) => {
       callbacks.onAtualizarTime(timeId, { nome: e.target.value });
@@ -296,27 +265,6 @@ function vincularEventos(app, partida, callbacks) {
     app.querySelector(`#cor-${timeId}`).addEventListener("input", (e) => {
       callbacks.onAtualizarTime(timeId, { cor: e.target.value });
       e.target.closest(".time-card").style.setProperty("--cor-time", e.target.value);
-    });
-
-    app.querySelector(`[data-adicionar="${timeId}"]`)?.addEventListener("click", () => {
-      const nomeInput = app.querySelector(`#novoNome-${timeId}`);
-      const numeroInput = app.querySelector(`#novoNumero-${timeId}`);
-      const msgErroJogador = app.querySelector(`#msgErroJogador-${timeId}`);
-      const nome = nomeInput.value.trim();
-      const numero = parseInt(numeroInput.value, 10);
-
-      msgErroJogador?.classList.remove("visivel");
-      if (!nome || Number.isNaN(numero)) return;
-
-      if (numeroJaUsado(partida, timeId, numero)) {
-        if (msgErroJogador) {
-          msgErroJogador.textContent = `Já existe um jogador com a camisa nº ${numero} nesse time.`;
-          msgErroJogador.classList.add("visivel");
-        }
-        return;
-      }
-
-      callbacks.onAdicionarJogador(timeId, nome, numero);
     });
   });
 
@@ -328,13 +276,6 @@ function vincularEventos(app, partida, callbacks) {
     app.querySelector(`#cor-reserva-${time.id}`)?.addEventListener("input", (e) => {
       callbacks.onAtualizarTimeReserva(time.id, { cor: e.target.value });
       e.target.closest(".time-card").style.setProperty("--cor-time", e.target.value);
-    });
-  });
-
-  app.querySelectorAll("[data-remover]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const [timeId, jogadorId] = btn.dataset.remover.split(":");
-      callbacks.onRemoverJogador(timeId, parseInt(jogadorId, 10));
     });
   });
 
@@ -356,6 +297,31 @@ function vincularEventos(app, partida, callbacks) {
       callbacks.onRemoverJogadorPool(parseInt(btn.dataset.removerPool, 10));
     });
   });
+
+  app.querySelectorAll("[data-tocar-nivel]").forEach((span) => {
+    span.addEventListener("click", () => {
+      callbacks.onEditarNivelPool(parseInt(span.dataset.tocarNivel, 10));
+    });
+  });
+
+  const selectNivelEmEdicao = app.querySelector("[data-editar-nivel]");
+  if (selectNivelEmEdicao) {
+    const jogadorId = parseInt(selectNivelEmEdicao.dataset.editarNivel, 10);
+    let nivelConfirmado = false;
+
+    selectNivelEmEdicao.addEventListener("sl-change", (e) => {
+      nivelConfirmado = true;
+      callbacks.onAtualizarNivelPool(jogadorId, parseInt(e.target.value, 10));
+    });
+
+    // Tocar fora sem escolher um nível novo só fecha a edição, sem salvar nada.
+    selectNivelEmEdicao.addEventListener("sl-blur", () => {
+      if (nivelConfirmado) return;
+      callbacks.onEditarNivelPool(null);
+    });
+
+    selectNivelEmEdicao.show?.();
+  }
 
   app.querySelector("#btnSortear")?.addEventListener("click", () => callbacks.onSortear());
 
