@@ -315,12 +315,19 @@ function vincularEventos(app, partida, callbacks) {
     });
 
     // Tocar fora sem escolher um nível novo só fecha a edição, sem salvar nada.
+    // O adiamento é necessário porque, ao escolher uma opção, o componente dispara
+    // "sl-blur" praticamente junto com "sl-change" — sem o setTimeout, o blur às vezes
+    // chega primeiro e fecha a edição antes do valor novo ser salvo.
     selectNivelEmEdicao.addEventListener("sl-blur", () => {
-      if (nivelConfirmado) return;
-      callbacks.onEditarNivelPool(null);
+      setTimeout(() => {
+        if (nivelConfirmado) return;
+        callbacks.onEditarNivelPool(null);
+      }, 0);
     });
 
-    selectNivelEmEdicao.show?.();
+    // Espera o componente terminar de montar antes de abrir o dropdown,
+    // senão o show() cedo demais não tem efeito em alguns navegadores/dispositivos.
+    Promise.resolve(selectNivelEmEdicao.updateComplete).then(() => selectNivelEmEdicao.show?.());
   }
 
   app.querySelector("#btnSortear")?.addEventListener("click", () => callbacks.onSortear());
