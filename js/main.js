@@ -2,6 +2,7 @@ import {
   criarPartidaVazia,
   definirFormato,
   definirDuracao,
+  definirModoJogo,
   definirTime,
   definirTimeReserva,
   iniciarPartida,
@@ -21,9 +22,11 @@ import { sortearTimes } from "./logica/sorteio.js";
 import { sortearTitularesTime } from "./logica/titulares.js";
 import { registrarGol, registrarSubstituicao, removerEvento } from "./logica/eventos.js";
 import { registrarPenaltis, iniciarProximaRodada } from "./logica/rodizio.js";
+import { iniciarTrocaDupla } from "./logica/rodizioAmador.js";
 import { salvar, carregar } from "./storage.js";
 import { manterTelaLigada, liberarTelaLigada } from "./wakeLock.js";
-import { renderTelaConfig } from "./ui/telaConfig.js";
+import { renderTelaModo } from "./ui/telaModo.js";
+import { renderTelaConfig, renderProximoJogo } from "./ui/telaConfig.js";
 import { renderPlacar, atualizarRelogio } from "./ui/placar.js";
 import { renderEstatisticas } from "./ui/estatisticas.js";
 import { renderSumula } from "./ui/sumula.js";
@@ -38,7 +41,7 @@ aplicarTemaShoelace();
 consultaTemaEscuro.addEventListener("change", aplicarTemaShoelace);
 
 let partida = carregar() || criarPartidaVazia();
-let telaAtual = partida.status === "nao_iniciada" ? "config" : "placar";
+let telaAtual = partida.status !== "nao_iniciada" ? "placar" : partida.modoJogo ? "config" : "modo";
 
 // Estado de navegação — transiente, não faz parte dos dados da partida.
 let painelAberto = null; // null | "gol" | "substituicao"
@@ -60,7 +63,11 @@ function renderizar() {
     liberarTelaLigada();
   }
 
-  if (telaAtual === "config") {
+  if (telaAtual === "modo") {
+    renderTelaModo(callbacksModo);
+  } else if (telaAtual === "proximoJogo") {
+    renderProximoJogo(partida, callbacksConfig);
+  } else if (telaAtual === "config") {
     renderTelaConfig(partida, formatoConfirmado, editandoNivelPoolId, callbacksConfig);
   } else if (telaAtual === "estatisticas") {
     renderEstatisticas(partida, callbacksEstatisticas);
@@ -70,6 +77,14 @@ function renderizar() {
     renderPlacar(partida, { painelAberto, jogadorSaiSelecionado, penaltisTemp }, callbacksPlacar);
   }
 }
+
+const callbacksModo = {
+  onEscolherModo: (modo) => {
+    partida = definirModoJogo(partida, modo);
+    telaAtual = "config";
+    renderizar();
+  }
+};
 
 const callbacksConfig = {
   onConfirmarFormato: (jogadoresPorTime, duracaoMinutos) => {
@@ -245,7 +260,16 @@ const callbacksPlacar = {
   onIniciarProximaRodada: (timeReservaId) => {
     partida = iniciarProximaRodada(partida, timeReservaId);
     penaltisTemp = { casa: 0, visitante: 0 };
-    telaAtual = "config"; // reaproveita a tela de config pra revisar/iniciar o próximo jogo
+    telaAtual = "proximoJogo"; // times já vêm prontos da rotação, só confirma e inicia
+    renderizar();
+  },
+
+  // ===== Modo amador: empate com fila de 2+ times troca os 2 times de uma vez =====
+
+  onIniciarTrocaDupla: () => {
+    partida = iniciarTrocaDupla(partida);
+    penaltisTemp = { casa: 0, visitante: 0 };
+    telaAtual = "proximoJogo";
     renderizar();
   }
 };
@@ -266,7 +290,7 @@ const callbacksSumula = {
 
 function reiniciarApp() {
   partida = criarPartidaVazia();
-  telaAtual = "config";
+  telaAtual = "modo";
   formatoConfirmado = false;
   painelAberto = null;
   jogadorSaiSelecionado = null;

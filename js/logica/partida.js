@@ -6,6 +6,7 @@ export function criarPartidaVazia() {
     id: Date.now(),
     data: dataLocalHoje(),
     formato: { jogadoresPorTime: 10, duracaoMinutos: 20 },
+    modoJogo: null, // null (ainda não escolhido) | "amador" | "profissional"
     status: "nao_iniciada", // nao_iniciada | em_andamento | intervalo | encerrada
     tempo: "1_tempo", // 1_tempo | 2_tempo
     minutoAtual: 0, // tempo decorrido no tempo atual (a UI mostra a contagem regressiva a partir da duração)
@@ -42,6 +43,10 @@ export function definirDuracao(partida, duracaoMinutos) {
     ...partida,
     formato: { ...partida.formato, duracaoMinutos }
   };
+}
+
+export function definirModoJogo(partida, modoJogo) {
+  return { ...partida, modoJogo };
 }
 
 export function definirModoFormacao(partida, modo) {

@@ -3,6 +3,7 @@
 import { ativarRipple } from "./ripple.js";
 import { buscarJogador } from "../logica/eventos.js";
 import { calcularVencedor } from "../logica/rodizio.js";
+import { precisaTrocaDupla } from "../logica/rodizioAmador.js";
 import { ICONE_EVENTO, ROTULO_TEMPO_CURTO, descreverEvento } from "./timelineFormato.js";
 import { iconeEstatisticas, iconeEditar } from "./icones.js";
 import { escapeHtml, rotuloJogador } from "./dom.js";
@@ -38,6 +39,7 @@ export function renderPlacar(partida, uiState, callbacks) {
 
     <sl-card class="card cronometro-card">
       <p class="badge-status">${rotuloStatus(partida)}</p>
+      ${renderAvisoVitoriaAntecipada(partida)}
       <div class="cronometro">
         <div class="relogio-circulo ${tempoEsgotado(partida) ? "relogio-circulo-esgotado" : ""}" id="relogioCirculo">
           <div class="relogio-grande" id="relogioTexto">${formatarRelogio(partida)}</div>
@@ -107,18 +109,36 @@ function formatarRelogio(partida) {
 function rotuloStatus(partida) {
   if (partida.status === "intervalo") return "Intervalo";
   if (partida.status === "encerrada") return "Partida encerrada";
+  if (partida.modoJogo === "amador") return "Jogo em andamento";
   return ROTULO_TEMPO[partida.tempo];
 }
 
+// Modo amador: aviso informativo quando um time já bateu 2 gols — não encerra nada
+// sozinho, só sinaliza pra quem estiver arbitrando decidir a hora de encerrar.
+function renderAvisoVitoriaAntecipada(partida) {
+  if (partida.modoJogo !== "amador" || partida.status !== "em_andamento") return "";
+  const { casa, visitante } = partida.placar;
+  if (casa === visitante || Math.max(casa, visitante) < 2) return "";
+  const vencedorId = casa > visitante ? "casa" : "visitante";
+  const nome = partida.times[vencedorId].nome;
+  return `<p class="aviso-vitoria-antecipada">🏆 ${escapeHtml(nome)} já fez 2 gols! Encerre a partida quando quiser.</p>`;
+}
+
 function renderBotaoControleTempo(partida) {
-  if (partida.status === "em_andamento" && partida.tempo === "1_tempo") {
-    return `<sl-button variant="primary" pill class="botao-full" id="btnEncerrarTempo">Encerrar 1º Tempo</sl-button>`;
-  }
-  if (partida.status === "intervalo") {
-    return `<sl-button variant="primary" pill class="botao-full" id="btnIniciarSegundoTempo">Iniciar 2º Tempo</sl-button>`;
-  }
-  if (partida.status === "em_andamento" && partida.tempo === "2_tempo") {
-    return `<sl-button variant="primary" pill class="botao-full" id="btnEncerrarPartida">Encerrar Partida</sl-button>`;
+  if (partida.modoJogo === "amador") {
+    if (partida.status === "em_andamento") {
+      return `<sl-button variant="primary" pill class="botao-full" id="btnEncerrarPartida">Encerrar Partida</sl-button>`;
+    }
+  } else {
+    if (partida.status === "em_andamento" && partida.tempo === "1_tempo") {
+      return `<sl-button variant="primary" pill class="botao-full" id="btnEncerrarTempo">Encerrar 1º Tempo</sl-button>`;
+    }
+    if (partida.status === "intervalo") {
+      return `<sl-button variant="primary" pill class="botao-full" id="btnIniciarSegundoTempo">Iniciar 2º Tempo</sl-button>`;
+    }
+    if (partida.status === "em_andamento" && partida.tempo === "2_tempo") {
+      return `<sl-button variant="primary" pill class="botao-full" id="btnEncerrarPartida">Encerrar Partida</sl-button>`;
+    }
   }
   if (partida.status === "encerrada") {
     return `
@@ -132,10 +152,31 @@ function renderBotaoControleTempo(partida) {
 // ===== Modo rodízio: transição pro próximo jogo (vencedor fica, perdedor sai pra fila) =====
 
 function renderProximaRodada(partida, uiState) {
+  if (partida.modoJogo === "amador" && precisaTrocaDupla(partida)) {
+    return renderTrocaDupla(partida);
+  }
   if (calcularVencedor(partida) === null) {
     return renderPenaltis(partida, uiState);
   }
   return renderEscolherProximoTime(partida);
+}
+
+// Modo amador, empate com fila de 2+ times: sai quem empatou, entram os 2 próximos da
+// fila — sem disputa de pênaltis (ver logica/rodizioAmador.js).
+function renderTrocaDupla(partida) {
+  const casa = partida.times.casa;
+  const visitante = partida.times.visitante;
+  const [entra1, entra2] = partida.filaReserva;
+
+  return `
+    <sl-card class="card">
+      <h2>Empate!</h2>
+      <p class="status-partida">
+        Saem ${escapeHtml(casa.nome)} e ${escapeHtml(visitante.nome)}. Entram ${escapeHtml(entra1.nome)} e ${escapeHtml(entra2.nome)}.
+      </p>
+      <sl-button variant="primary" pill class="botao-full" id="btnTrocaDupla">Começar próximo jogo</sl-button>
+    </sl-card>
+  `;
 }
 
 // O botão de confirmar fica desabilitado enquanto os pênaltis estão empatados (abaixo),
@@ -360,5 +401,6 @@ function vincularEventos(app, partida, uiState, callbacks) {
   app.querySelectorAll("[data-proximo-time]").forEach((btn) => {
     btn.addEventListener("click", () => callbacks.onIniciarProximaRodada(parseInt(btn.dataset.proximoTime, 10)));
   });
+  app.querySelector("#btnTrocaDupla")?.addEventListener("click", () => callbacks.onIniciarTrocaDupla());
 }
 

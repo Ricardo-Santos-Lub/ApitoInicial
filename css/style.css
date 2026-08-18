@@ -720,6 +720,21 @@ button.botao.secundario {
   margin-bottom: 0.75rem;
 }
 
+.badge-modo {
+  margin-bottom: 1rem;
+}
+
+/* Modo amador: aviso de time que já bateu 2 gols, dentro do card do cronômetro. */
+.aviso-vitoria-antecipada {
+  color: var(--md-on-primary-container);
+  background: var(--md-primary-container);
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--shape-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
 .cronometro {
   display: flex;
   align-items: center;

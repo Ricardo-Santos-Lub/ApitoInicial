@@ -4,6 +4,31 @@
 
 import { escapeHtml, rotuloJogador } from "./dom.js";
 
+// Tela enxuta pós-rotação do rodízio (vencedor fica, próximo time da fila já escolhido):
+// os times já vêm prontos de antes, então não faz sentido mostrar de novo nome/cor/
+// escalação/pool — só confirma quem joga e deixa iniciar.
+export function renderProximoJogo(partida, callbacks) {
+  const app = document.getElementById("app");
+  app.classList.remove("tem-nav-inferior");
+
+  const casa = partida.times.casa;
+  const visitante = partida.times.visitante;
+
+  app.innerHTML = `
+    <sl-card class="card">
+      <h2>Próximo jogo</h2>
+      <p class="status-partida">${escapeHtml(casa.nome)} <strong>🆚</strong> ${escapeHtml(visitante.nome)}</p>
+    </sl-card>
+
+    <div class="botao-principal-wrap">
+      <p class="erro" id="msgErro"></p>
+      <sl-button id="btnIniciar" variant="primary" size="large" pill class="botao-full">Iniciar Partida</sl-button>
+    </div>
+  `;
+
+  app.querySelector("#btnIniciar").addEventListener("click", () => callbacks.onIniciar());
+}
+
 export function renderTelaConfig(partida, formatoConfirmado, editandoNivelPoolId, callbacks) {
   const app = document.getElementById("app");
   app.classList.remove("tem-nav-inferior");
@@ -29,6 +54,8 @@ export function renderTelaConfig(partida, formatoConfirmado, editandoNivelPoolId
   const jaComecou = partida.status !== "nao_iniciada";
 
   app.innerHTML = `
+    <p class="badge-status badge-modo">${partida.modoJogo === "amador" ? "Modo: Jogo Amador" : "Modo: Jogo Profissional"}</p>
+
     <sl-card class="card">
       <h2>Formato da partida</h2>
       <div class="campo">
