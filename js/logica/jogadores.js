@@ -33,11 +33,18 @@ export function removerJogador(partida, timeId, jogadorId) {
 }
 
 export function adicionarJogadorPool(partida, nome, nivel) {
-  const jogador = { id: partida.proximoJogadorId, nome, nivel, timeId: null };
+  const jogador = { id: partida.proximoJogadorId, nome, nivel, timeId: null, goleiro: false };
   return {
     ...partida,
     proximoJogadorId: partida.proximoJogadorId + 1,
     poolJogadores: [...partida.poolJogadores, jogador]
+  };
+}
+
+export function alternarGoleiroPool(partida, jogadorId) {
+  return {
+    ...partida,
+    poolJogadores: partida.poolJogadores.map((j) => (j.id === jogadorId ? { ...j, goleiro: !j.goleiro } : j))
   };
 }
 

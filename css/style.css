@@ -439,6 +439,34 @@ sl-icon-button[name="x-lg"] {
   font-size: 0.78rem;
 }
 
+.badge-goleiro {
+  font-size: 0.85rem;
+}
+
+.toggle-goleiro {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--md-outline);
+  border-radius: 50%;
+  background: var(--md-surface);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.toggle-goleiro.ativo {
+  opacity: 1;
+  filter: none;
+  border-color: var(--md-primary);
+  background: var(--md-primary-container);
+}
+
 .nome-jogador-pool[data-tocar-nivel] {
   cursor: pointer;
 }

@@ -1,7 +1,7 @@
 // Service worker do ApitoInicial: cache-first pros arquivos do próprio app, pra funcionar
 // em campo mesmo sem internet depois da primeira visita. Sobe CACHE_NAME a cada mudança
 // de arquivos estáticos pra forçar os clientes a buscar a versão nova.
-const CACHE_NAME = "apitoinicial-v4";
+const CACHE_NAME = "apitoinicial-v5";
 const ARQUIVOS_ESSENCIAIS = [
   "./",
   "./index.html",

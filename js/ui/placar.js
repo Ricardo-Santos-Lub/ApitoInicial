@@ -5,7 +5,7 @@ import { buscarJogador } from "../logica/eventos.js";
 import { calcularVencedor } from "../logica/rodizio.js";
 import { ICONE_EVENTO, ROTULO_TEMPO_CURTO, descreverEvento } from "./timelineFormato.js";
 import { iconeEstatisticas, iconeEditar } from "./icones.js";
-import { escapeHtml } from "./dom.js";
+import { escapeHtml, rotuloJogador } from "./dom.js";
 
 const ROTULO_TEMPO = {
   "1_tempo": "1º Tempo",
@@ -281,12 +281,6 @@ function renderListaSelecaoJogador(partida, atributoData, { timeIdFiltro = null,
       return `<p class="subtitulo-time">${escapeHtml(partida.times[timeId].nome)}</p><ul class="lista-selecao">${itens}</ul>`;
     })
     .join("");
-}
-
-function rotuloJogador(jogador) {
-  return jogador.numero != null
-    ? `<span class="badge-numero">${jogador.numero}</span> ${escapeHtml(jogador.nome)}`
-    : escapeHtml(jogador.nome);
 }
 
 // ===== Timeline =====

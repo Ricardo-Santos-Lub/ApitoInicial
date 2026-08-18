@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { sortearTimes } from "../js/logica/sorteio.js";
 import { criarPartidaVazia, definirFormato } from "../js/logica/partida.js";
-import { adicionarJogadorPool } from "../js/logica/jogadores.js";
+import { adicionarJogadorPool, alternarGoleiroPool } from "../js/logica/jogadores.js";
 
 test("sortearTimes não faz nada com menos de 2 jogadores no pool", () => {
   const p = adicionarJogadorPool(criarPartidaVazia(), "Sozinho", 5);
@@ -67,6 +67,54 @@ test("sortearTimes distribui a sobra (pool não é múltiplo exato) como reserva
   // 22 = 4 times de 5 + 2 sobrando -> exatamente 2 times com 6 jogadores, os outros 2 com 5
   assert.equal(tamanhos.filter((t) => t === 6).length, 2);
   assert.equal(tamanhos.filter((t) => t === 5).length, 2);
+});
+
+test("sortearTimes distribui 1 goleiro pra cada time quando há goleiros marcados no pool", () => {
+  let p = definirFormato(criarPartidaVazia(), 6);
+  for (let i = 0; i < 8; i++) p = adicionarJogadorPool(p, `J${i}`, (i % 5) + 1);
+  const [id1, id2] = p.poolJogadores.slice(0, 2).map((j) => j.id);
+  p = alternarGoleiroPool(p, id1);
+  p = alternarGoleiroPool(p, id2);
+
+  p = sortearTimes(p);
+  const goleirosCasa = p.times.casa.jogadores.filter((j) => j.goleiro).length;
+  const goleirosVisitante = p.times.visitante.jogadores.filter((j) => j.goleiro).length;
+  assert.equal(goleirosCasa, 1);
+  assert.equal(goleirosVisitante, 1);
+});
+
+test("sortearTimes com goleiro sobrando (mais goleiros que times) não perde nem duplica jogadores", () => {
+  let p = definirFormato(criarPartidaVazia(), 6);
+  for (let i = 0; i < 8; i++) p = adicionarJogadorPool(p, `J${i}`, (i % 5) + 1);
+  // marca todo mundo como goleiro: só há vaga "garantida" pra 2 (casa e visitante),
+  // o resto continua marcado como goleiro mas entra pelo sorteio normal por nível.
+  const idsOriginais = p.poolJogadores.map((j) => j.id).sort();
+  p.poolJogadores.forEach((j) => {
+    p = alternarGoleiroPool(p, j.id);
+  });
+
+  p = sortearTimes(p);
+  const todos = [...p.times.casa.jogadores, ...p.times.visitante.jogadores];
+  assert.equal(todos.length, 8);
+  assert.deepEqual(
+    todos.map((j) => j.id).sort(),
+    idsOriginais
+  );
+  assert.ok(p.times.casa.jogadores.some((j) => j.goleiro));
+  assert.ok(p.times.visitante.jogadores.some((j) => j.goleiro));
+});
+
+test("sortearTitulares mantém o goleiro em campo mesmo quando ele fica de fora no sorteio normal", () => {
+  let p = definirFormato(criarPartidaVazia(), 5);
+  for (let i = 0; i < 22; i++) p = adicionarJogadorPool(p, `J${i}`, (i % 5) + 1);
+  const idGoleiro = p.poolJogadores[0].id;
+  p = alternarGoleiroPool(p, idGoleiro);
+
+  p = sortearTimes(p);
+  const todosOsTimes = [p.times.casa, p.times.visitante, ...p.filaReserva];
+  const timeDoGoleiro = todosOsTimes.find((time) => time.jogadores.some((j) => j.id === idGoleiro));
+  const goleiroNoTime = timeDoGoleiro.jogadores.find((j) => j.id === idGoleiro);
+  assert.equal(goleiroNoTime.titular, true);
 });
 
 test("sortearTimes: cada time formado respeita o limite de titulares em campo", () => {

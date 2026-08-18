@@ -11,7 +11,12 @@ import {
   iniciarSegundoTempo,
   encerrarPartida
 } from "./logica/partida.js";
-import { adicionarJogadorPool, removerJogadorPool, atualizarNivelJogadorPool } from "./logica/jogadores.js";
+import {
+  adicionarJogadorPool,
+  removerJogadorPool,
+  atualizarNivelJogadorPool,
+  alternarGoleiroPool
+} from "./logica/jogadores.js";
 import { sortearTimes } from "./logica/sorteio.js";
 import { sortearTitularesTime } from "./logica/titulares.js";
 import { registrarGol, registrarSubstituicao, removerEvento } from "./logica/eventos.js";
@@ -112,6 +117,11 @@ const callbacksConfig = {
   onAtualizarNivelPool: (jogadorId, nivel) => {
     partida = atualizarNivelJogadorPool(partida, jogadorId, nivel);
     editandoNivelPoolId = null;
+    renderizar();
+  },
+
+  onAlternarGoleiroPool: (jogadorId) => {
+    partida = alternarGoleiroPool(partida, jogadorId);
     renderizar();
   },
 

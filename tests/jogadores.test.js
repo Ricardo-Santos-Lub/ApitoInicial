@@ -5,7 +5,8 @@ import {
   removerJogador,
   numeroJaUsado,
   adicionarJogadorPool,
-  removerJogadorPool
+  removerJogadorPool,
+  alternarGoleiroPool
 } from "../js/logica/jogadores.js";
 import { criarPartidaVazia } from "../js/logica/partida.js";
 
@@ -45,7 +46,22 @@ test("pool: adicionar e remover jogador sem time (modo sorteio)", () => {
   p = adicionarJogadorPool(p, "Ciclano", 3);
   assert.equal(p.poolJogadores.length, 1);
   assert.equal(p.poolJogadores[0].timeId, null);
+  assert.equal(p.poolJogadores[0].goleiro, false);
 
   p = removerJogadorPool(p, p.poolJogadores[0].id);
   assert.equal(p.poolJogadores.length, 0);
+});
+
+test("alternarGoleiroPool liga e desliga a marcação, sem afetar outros jogadores", () => {
+  let p = criarPartidaVazia();
+  p = adicionarJogadorPool(p, "Ciclano", 3);
+  p = adicionarJogadorPool(p, "Beltrano", 4);
+  const [id1, id2] = p.poolJogadores.map((j) => j.id);
+
+  p = alternarGoleiroPool(p, id1);
+  assert.equal(p.poolJogadores.find((j) => j.id === id1).goleiro, true);
+  assert.equal(p.poolJogadores.find((j) => j.id === id2).goleiro, false);
+
+  p = alternarGoleiroPool(p, id1);
+  assert.equal(p.poolJogadores.find((j) => j.id === id1).goleiro, false);
 });

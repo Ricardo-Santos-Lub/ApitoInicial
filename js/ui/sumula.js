@@ -4,7 +4,7 @@
 import { ativarRipple } from "./ripple.js";
 import { calcularEstatisticas } from "../logica/estatisticas.js";
 import { ICONE_EVENTO, ROTULO_TEMPO_CURTO, descreverEvento } from "./timelineFormato.js";
-import { escapeHtml } from "./dom.js";
+import { escapeHtml, rotuloJogador } from "./dom.js";
 
 export function renderSumula(partida, callbacks) {
   const app = document.getElementById("app");
@@ -74,7 +74,7 @@ function renderEscalacao(partida, timeId) {
   const titulares = partida.times[timeId].jogadores.filter((j) => j.titular);
   const reservas = partida.times[timeId].jogadores.filter((j) => !j.titular);
 
-  const item = (j) => `<li><span>${j.numero != null ? `<span class="badge-numero">${j.numero}</span> ` : ""}${escapeHtml(j.nome)}</span></li>`;
+  const item = (j) => `<li><span>${rotuloJogador(j)}</span></li>`;
 
   const listaTitulares = titulares.length
     ? titulares.map(item).join("")

@@ -2,7 +2,7 @@
 // Só este tipo de arquivo pode tocar em document.*.
 // Usa os web components do Shoelace (vendor/shoelace) pros controles de formulário.
 
-import { escapeHtml } from "./dom.js";
+import { escapeHtml, rotuloJogador } from "./dom.js";
 
 export function renderTelaConfig(partida, formatoConfirmado, editandoNivelPoolId, callbacks) {
   const app = document.getElementById("app");
@@ -214,7 +214,7 @@ function renderItemPool(jogador, editandoNivelPoolId) {
 
   const nomeHtml = editando
     ? `<span class="nome-jogador-pool">${escapeHtml(jogador.nome)}</span>`
-    : `<span class="nome-jogador-pool" data-tocar-nivel="${jogador.id}">${escapeHtml(jogador.nome)} <span class="nivel-tag">nível ${jogador.nivel}</span></span>`;
+    : `<span class="nome-jogador-pool" data-tocar-nivel="${jogador.id}">${rotuloJogador(jogador)}</span>`;
 
   const selectHtml = editando
     ? `<sl-select value="${jogador.nivel}" size="small" class="select-nivel-inline" data-editar-nivel="${jogador.id}">
@@ -231,15 +231,16 @@ function renderItemPool(jogador, editandoNivelPoolId) {
         ${nomeHtml}
         <span class="pool-item-controles">
           ${selectHtml}
+          <button
+            type="button"
+            class="toggle-goleiro ${jogador.goleiro ? "ativo" : ""}"
+            data-toggle-goleiro="${jogador.id}"
+            aria-pressed="${jogador.goleiro}"
+            title="${jogador.goleiro ? "Desmarcar como goleiro" : "Marcar como goleiro"}"
+          >🧤</button>
           <sl-icon-button name="x-lg" label="Remover jogador" data-remover-pool="${jogador.id}"></sl-icon-button>
         </span>
       </li>`;
-}
-
-function rotuloJogador(jogador) {
-  if (jogador.numero != null) return `<span class="badge-numero">${jogador.numero}</span> ${escapeHtml(jogador.nome)}`;
-  if (jogador.nivel) return `${escapeHtml(jogador.nome)} <span class="nivel-tag">nível ${jogador.nivel}</span>`;
-  return escapeHtml(jogador.nome);
 }
 
 function jaSorteado(partida) {
@@ -301,6 +302,12 @@ function vincularEventos(app, partida, callbacks) {
   app.querySelectorAll("[data-tocar-nivel]").forEach((span) => {
     span.addEventListener("click", () => {
       callbacks.onEditarNivelPool(parseInt(span.dataset.tocarNivel, 10));
+    });
+  });
+
+  app.querySelectorAll("[data-toggle-goleiro]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      callbacks.onAlternarGoleiroPool(parseInt(btn.dataset.toggleGoleiro, 10));
     });
   });
 
