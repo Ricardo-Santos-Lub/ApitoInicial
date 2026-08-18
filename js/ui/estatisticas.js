@@ -1,7 +1,7 @@
 // Camada de UI: tela de estatísticas por jogador. Só lê o estado e desenha.
 
 import { ativarRipple } from "./ripple.js";
-import { calcularEstatisticas } from "../logica/estatisticas.js";
+import { calcularEstatisticas, calcularEstatisticasGerais } from "../logica/estatisticas.js";
 import { escapeHtml } from "./dom.js";
 
 export function renderEstatisticas(partida, callbacks) {
@@ -19,6 +19,8 @@ export function renderEstatisticas(partida, callbacks) {
         ${escapeHtml(partida.times.casa.nome)} ${partida.placar.casa} x ${partida.placar.visitante} ${escapeHtml(partida.times.visitante.nome)}
       </p>
     </sl-card>
+
+    ${partida.historicoEventos.length ? renderArtilheirosSessao(partida) : ""}
 
     <sl-card class="card" style="--cor-time:${partida.times.casa.cor}">
       <h2 class="titulo-time-cor">${escapeHtml(partida.times.casa.nome)}</h2>
@@ -38,6 +40,28 @@ export function renderEstatisticas(partida, callbacks) {
   app.querySelector("#btnVoltarPlacar").addEventListener("click", callbacks.onVoltar);
   app.querySelector("#btnVoltarTopo").addEventListener("click", callbacks.onVoltar);
   ativarRipple(app);
+}
+
+// Soma os gols de todas as rodadas já jogadas na sessão (não só a atual) — fica disponível
+// até o usuário voltar pra tela inicial (ver historicoEventos em logica/partida.js).
+function renderArtilheirosSessao(partida) {
+  const stats = calcularEstatisticasGerais(partida);
+  const itens = stats
+    .map(
+      (s) => `
+      <li class="item-estatistica">
+        <span>${escapeHtml(s.nome)}${s.timeNome ? ` <small>(${escapeHtml(s.timeNome)})</small>` : ""}</span>
+        <span class="tags-estatistica"><span class="tag-stat">⚽ ${s.gols}</span></span>
+      </li>`
+    )
+    .join("");
+
+  return `
+    <sl-card class="card">
+      <h2>🏆 Artilheiros da sessão</h2>
+      <ul class="lista-jogadores">${itens}</ul>
+    </sl-card>
+  `;
 }
 
 function renderListaEstatisticas(partida, timeId) {

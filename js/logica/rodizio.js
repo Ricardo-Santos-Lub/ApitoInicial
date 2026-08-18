@@ -51,6 +51,7 @@ export function iniciarProximaRodada(partida, timeReservaId = null) {
     },
     placar: { casa: 0, visitante: 0 },
     eventos: [],
+    historicoEventos: [...partida.historicoEventos, ...partida.eventos],
     status: "nao_iniciada",
     tempo: "1_tempo",
     minutoAtual: 0,

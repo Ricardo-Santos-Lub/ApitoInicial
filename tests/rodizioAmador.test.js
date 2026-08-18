@@ -64,3 +64,17 @@ test("iniciarTrocaDupla zera placar, eventos e cronômetro pra nova rodada", () 
   assert.equal(proxima.tempoInicioEpoch, null);
   assert.equal(proxima.penaltis, null);
 });
+
+test("iniciarTrocaDupla arquiva os eventos da rodada em historicoEventos antes de zerar", () => {
+  const eventoRodada = { id: 1, tipo: "gol" };
+  const p = {
+    ...partidaComFila(),
+    placar: { casa: 1, visitante: 1 },
+    eventos: [eventoRodada],
+    historicoEventos: [{ id: 0, tipo: "gol" }]
+  };
+
+  const proxima = iniciarTrocaDupla(p);
+  assert.deepEqual(proxima.historicoEventos, [{ id: 0, tipo: "gol" }, eventoRodada]);
+  assert.deepEqual(proxima.eventos, []);
+});

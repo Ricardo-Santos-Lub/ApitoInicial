@@ -90,3 +90,17 @@ test("iniciarProximaRodada zera placar, eventos e cronômetro pra nova rodada", 
   assert.equal(proxima.tempoInicioEpoch, null);
   assert.equal(proxima.penaltis, null);
 });
+
+test("iniciarProximaRodada arquiva os eventos da rodada em historicoEventos antes de zerar", () => {
+  const eventoRodada1 = { id: 1, tipo: "gol" };
+  const p = {
+    ...partidaComFila(),
+    placar: { casa: 2, visitante: 0 },
+    eventos: [eventoRodada1],
+    historicoEventos: [{ id: 0, tipo: "gol" }] // rodada anterior, já arquivada antes desta
+  };
+
+  const proxima = iniciarProximaRodada(p, p.filaReserva[0].id);
+  assert.deepEqual(proxima.historicoEventos, [{ id: 0, tipo: "gol" }, eventoRodada1]);
+  assert.deepEqual(proxima.eventos, []);
+});

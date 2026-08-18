@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { calcularEstatisticas } from "../js/logica/estatisticas.js";
+import { calcularEstatisticas, calcularEstatisticasGerais } from "../js/logica/estatisticas.js";
 import { criarPartidaVazia } from "../js/logica/partida.js";
 import { adicionarJogador } from "../js/logica/jogadores.js";
 import { registrarGol, registrarSubstituicao } from "../js/logica/eventos.js";
@@ -41,4 +41,38 @@ test("calcularEstatisticas ignora eventos de substituição e do outro time", ()
 test("calcularEstatisticas retorna lista vazia sem eventos", () => {
   const p = criarPartidaVazia();
   assert.deepEqual(calcularEstatisticas(p, "casa"), []);
+});
+
+test("calcularEstatisticasGerais soma gols da rodada atual com os de historicoEventos", () => {
+  let p = criarPartidaVazia();
+  p = adicionarJogador(p, "casa", "Artilheiro", 9);
+  const [artilheiro] = p.times.casa.jogadores;
+
+  // 1 gol já arquivado de uma rodada anterior (rotação do rodízio) + 1 gol da rodada atual.
+  p = { ...p, historicoEventos: [{ id: 1, tipo: "gol", timeId: "casa", jogadorId: artilheiro.id }] };
+  p = registrarGol(p, "casa", artilheiro.id);
+
+  const stats = calcularEstatisticasGerais(p);
+  assert.equal(stats.length, 1);
+  assert.equal(stats[0].nome, "Artilheiro");
+  assert.equal(stats[0].gols, 2);
+  assert.equal(stats[0].timeNome, p.times.casa.nome);
+});
+
+test("calcularEstatisticasGerais resolve o nome do jogador mesmo se o time dele estiver na fila de reserva agora", () => {
+  let p = criarPartidaVazia();
+  p = adicionarJogador(p, "casa", "Jogador", 5);
+  const [jogador] = p.times.casa.jogadores;
+
+  p = {
+    ...p,
+    historicoEventos: [{ id: 1, tipo: "gol", timeId: "casa", jogadorId: jogador.id }],
+    filaReserva: [{ id: 99, nome: "Time da Fila", cor: "#000", jogadores: [jogador] }],
+    times: { ...p.times, casa: { ...p.times.casa, jogadores: [] } }
+  };
+
+  const stats = calcularEstatisticasGerais(p);
+  assert.equal(stats.length, 1);
+  assert.equal(stats[0].nome, "Jogador");
+  assert.equal(stats[0].timeNome, "Time da Fila");
 });

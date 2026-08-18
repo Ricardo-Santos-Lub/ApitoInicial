@@ -27,6 +27,10 @@ export function criarPartidaVazia() {
     filaReserva: [],
     placar: { casa: 0, visitante: 0 },
     eventos: [],
+    // Gols de rodadas já encerradas do rodízio (ver logica/rodizio.js e rodizioAmador.js) —
+    // guardados aqui pra tela de estatísticas continuar somando o total da sessão inteira,
+    // mesmo depois que `eventos` é zerado pra cada rodada nova. Só reseta com o app inteiro.
+    historicoEventos: [],
     penaltis: null // { casa, visitante } só durante um desempate no modo rodízio
   };
 }
